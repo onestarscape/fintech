@@ -1,0 +1,96 @@
+@import "tailwindcss";
+
+/* ============================================================================
+   DESIGN TOKENS
+   Palette:
+     --ink        #12131A  near-black warm charcoal — primary text, dark surfaces
+     --paper      #FAFAF8  warm off-white — page background
+     --surface    #FFFFFF  card/panel background
+     --accent     #4A3AA8  signature indigo-violet — primary actions, links, focus
+     --accent-2   #B9932F  muted gold — sparing premium highlight (RM badges, etc.)
+     --line       #E7E5E1  hairline borders
+     --muted      #85838C  secondary text
+     --success    #2F7A4F
+     --warning    #B9762F
+     --danger     #C1443C
+   Type:
+     --font-display  Space Grotesk — headings, numbers, product names
+     --font-body     Inter — body copy, UI labels
+     --font-mono     IBM Plex Mono — timestamps, reference numbers, data
+   ========================================================================== */
+
+:root {
+  --ink: #12131a;
+  --paper: #fafaf8;
+  --surface: #ffffff;
+  --accent: #4a3aa8;
+  --accent-soft: #ece9fb;
+  --accent-2: #b9932f;
+  --line: #e7e5e1;
+  --muted: #85838c;
+  --success: #2f7a4f;
+  --success-soft: #e7f4ec;
+  --warning: #b9762f;
+  --warning-soft: #fbf1e4;
+  --danger: #c1443c;
+  --danger-soft: #fbeae9;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+
+@theme inline {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-2: var(--accent-2);
+  --color-line: var(--line);
+  --color-muted: var(--muted);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-inter);
+  --font-mono: var(--font-plex-mono);
+
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-lg: var(--radius-lg);
+}
+
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body), system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: var(--font-display), system-ui, sans-serif;
+  letter-spacing: -0.02em;
+}
+
+.font-mono-data {
+  font-family: var(--font-mono), monospace;
+}
+
+/* Focus states — visible everywhere, never suppressed */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
