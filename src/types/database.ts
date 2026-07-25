@@ -2,8 +2,9 @@
 //   npx supabase gen types typescript --project-id <your-project-id> > src/types/database.ts
 // This hand-written version keeps local dev/type-checking working until then.
 
-export type UserRole = "customer" | "employee" | "admin" | "agent";
+export type UserRole = "customer" | "employee" | "admin" | "agent" | "builder";
 export type AgentStatus = "pending" | "approved" | "suspended";
+export type BuilderStatus = "pending" | "approved" | "suspended";
 export type CommissionStatus = "pending" | "approved" | "paid";
 export type PartnerType = "bank" | "nbfc" | "insurer" | "other";
 export type LeadStatus = "new" | "contacted" | "converted" | "dropped";
@@ -99,6 +100,7 @@ export interface Database {
           status: LeadStatus;
           assigned_to: string | null;
           agent_id: string | null;
+          project_id: string | null;
           external_ref: Record<string, unknown>;
           created_at: string;
           updated_at: string;
@@ -257,6 +259,35 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["commissions"]["Row"]>;
         Relationships: [];
       };
+      builders: {
+        Row: {
+          id: string;
+          company_name: string | null;
+          status: BuilderStatus;
+          approved_by: string | null;
+          approved_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["builders"]["Row"]> & { id: string };
+        Update: Partial<Database["public"]["Tables"]["builders"]["Row"]>;
+        Relationships: [];
+      };
+      projects: {
+        Row: {
+          id: string;
+          builder_id: string;
+          name: string;
+          location: string | null;
+          total_units: number | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["projects"]["Row"]> & {
+          builder_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["projects"]["Row"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -266,6 +297,7 @@ export interface Database {
       lead_status: LeadStatus;
       application_status: ApplicationStatus;
       agent_status: AgentStatus;
+      builder_status: BuilderStatus;
       commission_status: CommissionStatus;
     };
     CompositeTypes: Record<string, never>;

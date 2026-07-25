@@ -34,7 +34,8 @@ export async function middleware(request: NextRequest) {
     path.startsWith("/dashboard") ||
     path.startsWith("/admin") ||
     path.startsWith("/employee") ||
-    path.startsWith("/agent");
+    path.startsWith("/agent") ||
+    path.startsWith("/builder");
 
   if (isProtected && !user) {
     const redirectUrl = new URL("/login", request.url);
@@ -45,7 +46,10 @@ export async function middleware(request: NextRequest) {
   // Coarse role gate at the edge; RLS does the rest server-side. This just
   // avoids flashing the wrong panel before a redirect.
   if (
-    (path.startsWith("/admin") || path.startsWith("/employee") || path.startsWith("/agent")) &&
+    (path.startsWith("/admin") ||
+      path.startsWith("/employee") ||
+      path.startsWith("/agent") ||
+      path.startsWith("/builder")) &&
     user
   ) {
     const { data: profile } = await supabase
@@ -55,11 +59,14 @@ export async function middleware(request: NextRequest) {
       .single();
 
     const role = profile?.role;
+    const homeFor: Record<string, string> = {
+      employee: "/employee",
+      agent: "/agent",
+      builder: "/builder",
+    };
 
     if (path.startsWith("/admin") && role !== "admin") {
-      return NextResponse.redirect(
-        new URL(role === "employee" ? "/employee" : role === "agent" ? "/agent" : "/dashboard", request.url)
-      );
+      return NextResponse.redirect(new URL(homeFor[role ?? ""] ?? "/dashboard", request.url));
     }
 
     if (path.startsWith("/employee") && !["admin", "employee"].includes(role ?? "")) {
@@ -67,6 +74,10 @@ export async function middleware(request: NextRequest) {
     }
 
     if (path.startsWith("/agent") && !["admin", "agent"].includes(role ?? "")) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    if (path.startsWith("/builder") && !["admin", "builder"].includes(role ?? "")) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

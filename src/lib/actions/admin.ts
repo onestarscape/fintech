@@ -127,3 +127,27 @@ export async function markCommissionPaid(formData: FormData) {
     .eq("id", commissionId);
   revalidatePath("/admin/agents");
 }
+
+export async function approveBuilder(formData: FormData) {
+  const builderId = String(formData.get("builder_id"));
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  await supabase
+    .from("builders")
+    .update({ status: "approved", approved_by: user?.id, approved_at: new Date().toISOString() })
+    .eq("id", builderId);
+
+  await supabase.from("profiles").update({ role: "builder" }).eq("id", builderId);
+
+  revalidatePath("/admin/builders");
+}
+
+export async function suspendBuilder(formData: FormData) {
+  const builderId = String(formData.get("builder_id"));
+  const supabase = await createClient();
+  await supabase.from("builders").update({ status: "suspended" }).eq("id", builderId);
+  revalidatePath("/admin/builders");
+}
