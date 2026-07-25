@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/shared/product-card";
 import { Timeline } from "@/components/shared/timeline";
+import { ProductFlowchart } from "@/components/shared/product-flowchart";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +69,30 @@ export default async function HomePage() {
               Every product follows this same, transparent path — no surprises.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* EVERYTHING WE COVER — full product taxonomy, live + upcoming */}
+      <section className="mx-auto max-w-6xl px-6 py-16">
+        <div className="text-center">
+          <h2 className="font-display text-2xl font-semibold tracking-tight sm:text-3xl">
+            One platform, every financial product
+          </h2>
+          <p className="mx-auto mt-2 max-w-lg text-sm text-muted">
+            Everything routes through the same guided application engine —
+            whichever product you need.
+          </p>
+          <div className="mt-4 flex items-center justify-center gap-5 text-xs text-muted">
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-success" /> Live now
+            </span>
+            <span className="flex items-center gap-1.5">
+              <span className="h-1.5 w-1.5 rounded-full bg-line" /> Coming soon
+            </span>
+          </div>
+        </div>
+        <div className="mt-10">
+          <ProductFlowchart />
         </div>
       </section>
 
