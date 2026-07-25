@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { LayoutGrid, FileText, MessageSquare, Bell, User, LifeBuoy, Gift } from "lucide-react";
+import { LayoutGrid, FileText, MessageSquare, Bell, User, LifeBuoy, Gift, Briefcase } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 
@@ -11,6 +11,7 @@ const NAV = [
   { label: "Profile", href: "/dashboard/profile", icon: User },
   { label: "Support", href: "/dashboard/support", icon: LifeBuoy },
   { label: "Refer & earn", href: "/dashboard/referral", icon: Gift },
+  { label: "Become an agent", href: "/dashboard/become-agent", icon: Briefcase },
 ];
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Users, ClipboardList } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, Handshake } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 
@@ -7,6 +7,7 @@ const NAV = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
   { label: "Leads", href: "/admin/leads", icon: Users },
   { label: "Applications", href: "/admin/applications", icon: ClipboardList },
+  { label: "Agents", href: "/admin/agents", icon: Handshake },
 ];
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

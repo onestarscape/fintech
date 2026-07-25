@@ -31,7 +31,10 @@ export async function middleware(request: NextRequest) {
 
   const path = request.nextUrl.pathname;
   const isProtected =
-    path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/employee");
+    path.startsWith("/dashboard") ||
+    path.startsWith("/admin") ||
+    path.startsWith("/employee") ||
+    path.startsWith("/agent");
 
   if (isProtected && !user) {
     const redirectUrl = new URL("/login", request.url);
@@ -41,9 +44,10 @@ export async function middleware(request: NextRequest) {
 
   // Coarse role gate at the edge; RLS does the rest server-side. This just
   // avoids flashing the wrong panel before a redirect.
-  // /admin is admin-only. /employee is for employee (and admin, who can
-  // oversee both panels). Customers are kept out of both.
-  if ((path.startsWith("/admin") || path.startsWith("/employee")) && user) {
+  if (
+    (path.startsWith("/admin") || path.startsWith("/employee") || path.startsWith("/agent")) &&
+    user
+  ) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
@@ -54,11 +58,15 @@ export async function middleware(request: NextRequest) {
 
     if (path.startsWith("/admin") && role !== "admin") {
       return NextResponse.redirect(
-        new URL(role === "employee" ? "/employee" : "/dashboard", request.url)
+        new URL(role === "employee" ? "/employee" : role === "agent" ? "/agent" : "/dashboard", request.url)
       );
     }
 
     if (path.startsWith("/employee") && !["admin", "employee"].includes(role ?? "")) {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    if (path.startsWith("/agent") && !["admin", "agent"].includes(role ?? "")) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }

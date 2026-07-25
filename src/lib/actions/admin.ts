@@ -62,3 +62,68 @@ export async function verifyDocument(formData: FormData) {
 
   revalidatePath(`/admin/applications/${applicationId}`);
 }
+
+export async function approveAgent(formData: FormData) {
+  const agentId = String(formData.get("agent_id"));
+  const commissionRate = String(formData.get("commission_rate") ?? "0.50");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  await supabase
+    .from("agents")
+    .update({
+      status: "approved",
+      commission_rate: Number(commissionRate),
+      approved_by: user?.id,
+      approved_at: new Date().toISOString(),
+    })
+    .eq("id", agentId);
+
+  await supabase.from("profiles").update({ role: "agent" }).eq("id", agentId);
+
+  revalidatePath("/admin/agents");
+}
+
+export async function suspendAgent(formData: FormData) {
+  const agentId = String(formData.get("agent_id"));
+  const supabase = await createClient();
+  await supabase.from("agents").update({ status: "suspended" }).eq("id", agentId);
+  revalidatePath("/admin/agents");
+}
+
+export async function logCommission(formData: FormData) {
+  const applicationId = String(formData.get("application_id"));
+  const agentId = String(formData.get("agent_id"));
+  const disbursedAmount = Number(formData.get("disbursed_amount"));
+  const rate = Number(formData.get("rate_applied"));
+  const commissionAmount = Number(formData.get("commission_amount"));
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  await supabase.from("commissions").insert({
+    application_id: applicationId,
+    agent_id: agentId,
+    disbursed_amount: disbursedAmount || null,
+    rate_applied: rate || null,
+    commission_amount: commissionAmount,
+    created_by: user?.id,
+  });
+
+  revalidatePath(`/admin/applications/${applicationId}`);
+}
+
+export async function markCommissionPaid(formData: FormData) {
+  const commissionId = String(formData.get("commission_id"));
+  const supabase = await createClient();
+  await supabase
+    .from("commissions")
+    .update({ status: "paid", paid_at: new Date().toISOString() })
+    .eq("id", commissionId);
+  revalidatePath("/admin/agents");
+}

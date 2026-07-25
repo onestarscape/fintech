@@ -27,7 +27,7 @@ export function CopyReferralLink({ referralId }: { referralId: string }) {
 
   return (
     <div className="flex gap-2">
-      <Input ref={inputRef} defaultValue="" readOnly className="font-mono-data text-xs" />
+      <Input ref={inputRef} defaultValue="" readOnly className="min-w-0 flex-1 font-mono-data text-xs" />
       <Button type="button" variant="outline" size="md" onClick={handleCopy}>
         {copied ? "Copied" : "Copy"}
       </Button>

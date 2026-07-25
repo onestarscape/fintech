@@ -2,7 +2,9 @@
 //   npx supabase gen types typescript --project-id <your-project-id> > src/types/database.ts
 // This hand-written version keeps local dev/type-checking working until then.
 
-export type UserRole = "customer" | "employee" | "admin";
+export type UserRole = "customer" | "employee" | "admin" | "agent";
+export type AgentStatus = "pending" | "approved" | "suspended";
+export type CommissionStatus = "pending" | "approved" | "paid";
 export type PartnerType = "bank" | "nbfc" | "insurer" | "other";
 export type LeadStatus = "new" | "contacted" | "converted" | "dropped";
 export type ApplicationStatus =
@@ -96,6 +98,7 @@ export interface Database {
           requirement: string | null;
           status: LeadStatus;
           assigned_to: string | null;
+          agent_id: string | null;
           external_ref: Record<string, unknown>;
           created_at: string;
           updated_at: string;
@@ -218,6 +221,42 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["follow_ups"]["Row"]>;
         Relationships: [];
       };
+      agents: {
+        Row: {
+          id: string;
+          agency_name: string | null;
+          commission_rate: number;
+          status: AgentStatus;
+          approved_by: string | null;
+          approved_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["agents"]["Row"]> & { id: string };
+        Update: Partial<Database["public"]["Tables"]["agents"]["Row"]>;
+        Relationships: [];
+      };
+      commissions: {
+        Row: {
+          id: string;
+          agent_id: string;
+          application_id: string;
+          disbursed_amount: number | null;
+          rate_applied: number | null;
+          commission_amount: number;
+          status: CommissionStatus;
+          note: string | null;
+          created_by: string | null;
+          created_at: string;
+          paid_at: string | null;
+        };
+        Insert: Partial<Database["public"]["Tables"]["commissions"]["Row"]> & {
+          agent_id: string;
+          application_id: string;
+          commission_amount: number;
+        };
+        Update: Partial<Database["public"]["Tables"]["commissions"]["Row"]>;
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -226,6 +265,8 @@ export interface Database {
       partner_type: PartnerType;
       lead_status: LeadStatus;
       application_status: ApplicationStatus;
+      agent_status: AgentStatus;
+      commission_status: CommissionStatus;
     };
     CompositeTypes: Record<string, never>;
   };

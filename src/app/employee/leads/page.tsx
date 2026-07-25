@@ -71,11 +71,13 @@ export default async function EmployeeLeadsPage() {
                     </p>
                   ))}
                 </div>
-                <form action={addFollowUp} className="mt-3 flex gap-2">
+                <form action={addFollowUp} className="mt-3 flex flex-col gap-2 sm:flex-row">
                   <input type="hidden" name="lead_id" value={lead.id} />
                   <Input name="note" placeholder="Add a note or follow-up…" className="h-9 flex-1 text-sm" required />
-                  <Input name="due_at" type="date" className="h-9 w-36 text-sm" />
-                  <Button type="submit" variant="ghost" size="sm">Add</Button>
+                  <div className="flex gap-2">
+                    <Input name="due_at" type="date" className="h-9 w-full text-sm sm:w-36" />
+                    <Button type="submit" variant="ghost" size="sm">Add</Button>
+                  </div>
                 </form>
               </div>
             </Card>

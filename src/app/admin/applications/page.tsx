@@ -13,7 +13,8 @@ export default async function AdminApplicationsPage() {
     <div>
       <h1 className="font-display text-2xl font-semibold tracking-tight">Applications</h1>
       <div className="mt-6 overflow-hidden rounded-[var(--radius-lg)] border border-line">
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[640px] text-sm">
           <thead className="border-b border-line bg-black/[0.02] text-left text-xs font-medium text-muted">
             <tr>
               <th className="px-4 py-3">Applicant</th>
@@ -44,6 +45,7 @@ export default async function AdminApplicationsPage() {
             ))}
           </tbody>
         </table>
+        </div>
         {!applications?.length && (
           <p className="p-6 text-center text-sm text-muted">No applications yet.</p>
         )}

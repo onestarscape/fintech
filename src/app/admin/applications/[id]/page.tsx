@@ -6,7 +6,7 @@ import { Select, Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Timeline, type TimelineStep } from "@/components/shared/timeline";
 import { MessageThread } from "@/components/shared/message-thread";
-import { updateApplicationStatus, assignRelationshipManager, verifyDocument } from "@/lib/actions/admin";
+import { updateApplicationStatus, assignRelationshipManager, verifyDocument, logCommission } from "@/lib/actions/admin";
 import type { ApplicationStatus, RequiredDocumentDef } from "@/types/database";
 
 const STATUS_OPTIONS: ApplicationStatus[] = [
@@ -45,6 +45,17 @@ export default async function AdminApplicationDetailPage({
   const stages: string[] = product?.workflow_stages ?? [];
   const currentIndex = stages.indexOf(application.current_stage ?? "");
   const requiredDocs = (product?.required_documents ?? []) as RequiredDocumentDef[];
+
+  let agent: any = null;
+  let existingCommission: any = null;
+  if (lead?.agent_id) {
+    const [{ data: agentData }, { data: commissionData }] = await Promise.all([
+      supabase.from("agents").select("*").eq("id", lead.agent_id).single(),
+      supabase.from("commissions").select("*").eq("application_id", id).maybeSingle(),
+    ]);
+    agent = agentData;
+    existingCommission = commissionData;
+  }
 
   const timelineSteps: TimelineStep[] = stages.map((stage, i) => ({
     label: stage,
@@ -158,6 +169,47 @@ export default async function AdminApplicationDetailPage({
               })}
             </div>
           </Card>
+
+          {agent && (
+            <Card className="p-6">
+              <h2 className="text-sm font-semibold">Agent commission</h2>
+              <p className="mt-1 text-xs text-muted">
+                Referred by {agent.agency_name || "an agent"} · rate {agent.commission_rate}%
+              </p>
+
+              {existingCommission ? (
+                <div className="mt-4 rounded-[var(--radius-sm)] bg-success-soft px-3.5 py-2.5 text-sm text-success">
+                  Commission of ₹{Number(existingCommission.commission_amount).toLocaleString("en-IN")} logged
+                  ({existingCommission.status}).
+                </div>
+              ) : application.status === "disbursed" ? (
+                <form action={logCommission} className="mt-4 space-y-3">
+                  <input type="hidden" name="application_id" value={application.id} />
+                  <input type="hidden" name="agent_id" value={agent.id} />
+                  <input type="hidden" name="rate_applied" value={agent.commission_rate} />
+                  <div>
+                    <Label htmlFor="disbursed_amount">Disbursed loan amount (₹)</Label>
+                    <Input id="disbursed_amount" name="disbursed_amount" type="number" required />
+                  </div>
+                  <div>
+                    <Label htmlFor="commission_amount">Commission amount (₹)</Label>
+                    <Input id="commission_amount" name="commission_amount" type="number" step="0.01" required />
+                    <p className="mt-1 text-xs text-muted">
+                      Suggested at {agent.commission_rate}% — enter the final figure.
+                    </p>
+                  </div>
+                  <Button type="submit" variant="accent" size="md" className="w-full">
+                    Log commission
+                  </Button>
+                </form>
+              ) : (
+                <p className="mt-4 text-xs text-muted">
+                  Commission can be logged once this application is marked disbursed.
+                </p>
+              )}
+            </Card>
+          )}
+
           <Card className="p-6">
             <h2 className="text-sm font-semibold">Messages</h2>
             <div className="mt-4 h-96">
