@@ -95,6 +95,7 @@ export interface Database {
           city: string | null;
           requirement: string | null;
           status: LeadStatus;
+          assigned_to: string | null;
           external_ref: Record<string, unknown>;
           created_at: string;
           updated_at: string;
@@ -197,6 +198,24 @@ export interface Database {
           body: string;
         };
         Update: Partial<Database["public"]["Tables"]["messages"]["Row"]>;
+        Relationships: [];
+      };
+      follow_ups: {
+        Row: {
+          id: string;
+          lead_id: string | null;
+          application_id: string | null;
+          assigned_to: string | null;
+          note: string;
+          due_at: string | null;
+          is_done: boolean;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["follow_ups"]["Row"]> & {
+          note: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["follow_ups"]["Row"]>;
         Relationships: [];
       };
     };

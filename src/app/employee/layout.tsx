@@ -4,18 +4,18 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 
 const NAV = [
-  { label: "Overview", href: "/admin", icon: LayoutDashboard },
-  { label: "Leads", href: "/admin/leads", icon: Users },
-  { label: "Applications", href: "/admin/applications", icon: ClipboardList },
+  { label: "Overview", href: "/employee", icon: LayoutDashboard },
+  { label: "My Leads", href: "/employee/leads", icon: Users },
+  { label: "My Applications", href: "/employee/applications", icon: ClipboardList },
 ];
 
-export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user) redirect("/login?redirect=/admin");
+  if (!user) redirect("/login?redirect=/employee");
 
   const { data: profile } = await supabase
     .from("profiles")
@@ -23,12 +23,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .eq("id", user.id)
     .single();
 
-  if (!profile || profile.role !== "admin") {
-    redirect(profile?.role === "employee" ? "/employee" : "/dashboard");
+  if (!profile || !["admin", "employee"].includes(profile.role)) {
+    redirect("/dashboard");
   }
 
   return (
-    <DashboardShell navItems={NAV} userLabel={`${user.email} · Admin`} brandHref="/admin">
+    <DashboardShell navItems={NAV} userLabel={`${user.email} · Employee`} brandHref="/employee">
       {children}
     </DashboardShell>
   );

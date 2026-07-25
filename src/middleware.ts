@@ -30,7 +30,8 @@ export async function middleware(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const path = request.nextUrl.pathname;
-  const isProtected = path.startsWith("/dashboard") || path.startsWith("/admin");
+  const isProtected =
+    path.startsWith("/dashboard") || path.startsWith("/admin") || path.startsWith("/employee");
 
   if (isProtected && !user) {
     const redirectUrl = new URL("/login", request.url);
@@ -38,16 +39,26 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  // Coarse admin gate at the edge; fine-grained checks + RLS do the rest
-  // server-side. This just avoids flashing the admin shell to a customer.
-  if (path.startsWith("/admin") && user) {
+  // Coarse role gate at the edge; RLS does the rest server-side. This just
+  // avoids flashing the wrong panel before a redirect.
+  // /admin is admin-only. /employee is for employee (and admin, who can
+  // oversee both panels). Customers are kept out of both.
+  if ((path.startsWith("/admin") || path.startsWith("/employee")) && user) {
     const { data: profile } = await supabase
       .from("profiles")
       .select("role")
       .eq("id", user.id)
       .single();
 
-    if (!profile || !["admin", "employee"].includes(profile.role)) {
+    const role = profile?.role;
+
+    if (path.startsWith("/admin") && role !== "admin") {
+      return NextResponse.redirect(
+        new URL(role === "employee" ? "/employee" : "/dashboard", request.url)
+      );
+    }
+
+    if (path.startsWith("/employee") && !["admin", "employee"].includes(role ?? "")) {
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
