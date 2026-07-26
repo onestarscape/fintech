@@ -13,6 +13,9 @@ export default async function ApplicationDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
   const { data: application } = await supabase
     .from("applications")
@@ -21,6 +24,13 @@ export default async function ApplicationDetailPage({
     .single<any>();
 
   if (!application) notFound();
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name")
+    .eq("id", user!.id)
+    .single();
+  const customerName = profile?.full_name || user?.email || "Customer";
 
   const { data: history } = await supabase
     .from("status_history")
@@ -96,6 +106,7 @@ export default async function ApplicationDetailPage({
             <div className="mt-4">
               <DocumentUploader
                 applicationId={application.id}
+                customerName={customerName}
                 requiredDocuments={requiredDocs}
                 uploadedKeys={uploadedKeys}
               />

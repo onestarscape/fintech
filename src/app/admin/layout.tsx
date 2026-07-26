@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { LayoutDashboard, Users, ClipboardList, Handshake, Building2 } from "lucide-react";
+import { LayoutDashboard, Users, ClipboardList, Handshake, Building2, FileText } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 
@@ -7,6 +7,7 @@ const NAV = [
   { label: "Overview", href: "/admin", icon: LayoutDashboard },
   { label: "Leads", href: "/admin/leads", icon: Users },
   { label: "Applications", href: "/admin/applications", icon: ClipboardList },
+  { label: "Documents", href: "/admin/documents", icon: FileText },
   { label: "Agents", href: "/admin/agents", icon: Handshake },
   { label: "Builders", href: "/admin/builders", icon: Building2 },
 ];
