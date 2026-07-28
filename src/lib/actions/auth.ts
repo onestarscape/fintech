@@ -4,18 +4,48 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 
+/** Where each role lands by default when no specific page was requested. */
+function homeForRole(role: string | undefined) {
+  switch (role) {
+    case "admin":
+      return "/admin";
+    case "employee":
+      return "/employee";
+    case "agent":
+      return "/agent";
+    case "builder":
+      return "/builder";
+    default:
+      return "/dashboard";
+  }
+}
+
 export async function signInWithPassword(formData: FormData) {
   const email = String(formData.get("email") ?? "");
   const password = String(formData.get("password") ?? "");
-  const redirectTo = String(formData.get("redirect") ?? "/dashboard");
+  // Empty means "no specific page was requested" — e.g. middleware didn't
+  // bounce them from a protected route. In that case we send each role
+  // to its own home instead of always defaulting to the customer dashboard.
+  const explicitRedirect = String(formData.get("redirect") ?? "");
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
   if (error) {
     redirect(`/login?error=${encodeURIComponent(error.message)}`);
   }
-  redirect(redirectTo);
+
+  if (explicitRedirect) {
+    redirect(explicitRedirect);
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", data.user.id)
+    .single();
+
+  redirect(homeForRole(profile?.role));
 }
 
 export async function signUpWithPassword(formData: FormData) {

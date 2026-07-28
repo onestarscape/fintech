@@ -1,10 +1,29 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
+/** Where each role lands by default when no specific page was requested. */
+function homeForRole(role: string | undefined) {
+  switch (role) {
+    case "admin":
+      return "/admin";
+    case "employee":
+      return "/employee";
+    case "agent":
+      return "/agent";
+    case "builder":
+      return "/builder";
+    default:
+      return "/dashboard";
+  }
+}
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+  // Empty means "no specific page was requested" (see the login/partner
+  // login pages) — in that case each role gets sent to its own home
+  // rather than always defaulting to the customer dashboard.
+  const next = searchParams.get("next") ?? "";
   const oauthError = searchParams.get("error_description") || searchParams.get("error");
 
   // Google (or Supabase) can redirect back with an error before we even
@@ -16,9 +35,17 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
+      if (next) {
+        return NextResponse.redirect(`${origin}${next}`);
+      }
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", data.user.id)
+        .single();
+      return NextResponse.redirect(`${origin}${homeForRole(profile?.role)}`);
     }
     // Surface the real reason (e.g. "invalid flow state", "code verifier
     // mismatch") instead of a generic message — this is what actually

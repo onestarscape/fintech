@@ -3,13 +3,13 @@
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
-export function GoogleSignInButton({ redirectPath = "/dashboard" }: { redirectPath?: string }) {
+export function GoogleSignInButton({ redirectPath = "" }: { redirectPath?: string }) {
   async function handleClick() {
     const supabase = createClient();
     await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectPath)}`,
+        redirectTo: `${window.location.origin}/auth/callback${redirectPath ? `?next=${encodeURIComponent(redirectPath)}` : ""}`,
       },
     });
   }

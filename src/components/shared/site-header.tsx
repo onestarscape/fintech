@@ -34,6 +34,9 @@ export function SiteHeader() {
         </nav>
 
         <div className="hidden items-center gap-3 sm:flex">
+          <Link href="/partner-login" className="text-sm font-medium text-ink/60 hover:text-ink">
+            Partner login
+          </Link>
           <Link href="/login" className="text-sm font-medium text-ink/80 hover:text-ink">
             Log in
           </Link>
@@ -80,6 +83,13 @@ export function SiteHeader() {
               className="rounded-[var(--radius-sm)] px-2 py-2.5 text-sm font-medium text-ink/80"
             >
               Log in
+            </Link>
+            <Link
+              href="/partner-login"
+              onClick={() => setOpen(false)}
+              className="rounded-[var(--radius-sm)] px-2 py-2.5 text-sm font-medium text-ink/60"
+            >
+              Partner login
             </Link>
             <Link
               href="/signup"

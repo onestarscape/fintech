@@ -1,6 +1,6 @@
 import { LoginForm } from "@/components/shared/login-form";
 
-export default async function LoginPage({
+export default async function PartnerLoginPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string; redirect?: string }>;
@@ -9,10 +9,12 @@ export default async function LoginPage({
 
   return (
     <LoginForm
-      heading="Log in"
-      subtitle="Welcome back — track your applications in one place."
+      heading="Partner login"
+      subtitle="For agents, connectors & builders — refer customers and track your commissions."
       error={error}
       redirect={redirect}
+      signupPrompt="New partner?"
+      signupLabel="Create an account to apply"
     />
   );
 }
