@@ -7,12 +7,15 @@ import { Menu, X } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { LucideIcon } from "lucide-react";
 
 export interface NavItem {
   label: string;
   href: string;
-  icon: LucideIcon;
+  // A pre-rendered icon element (e.g. <LayoutGrid className="h-4 w-4" />),
+  // not the icon component itself — a raw component reference (function)
+  // can't cross the server -> client boundary as a prop, only a rendered
+  // element can.
+  icon: React.ReactNode;
 }
 
 function NavLinks({ navItems, onNavigate }: { navItems: NavItem[]; onNavigate?: () => void }) {
@@ -31,7 +34,7 @@ function NavLinks({ navItems, onNavigate }: { navItems: NavItem[]; onNavigate?: 
               active ? "bg-accent-soft text-accent" : "text-ink/80"
             )}
           >
-            <item.icon className="h-4 w-4" strokeWidth={1.75} />
+            {item.icon}
             {item.label}
           </Link>
         );

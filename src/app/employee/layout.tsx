@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 
 const NAV = [
-  { label: "Overview", href: "/employee", icon: LayoutDashboard },
-  { label: "My Leads", href: "/employee/leads", icon: Users },
-  { label: "My Applications", href: "/employee/applications", icon: ClipboardList },
+  { label: "Overview", href: "/employee", icon: <LayoutDashboard className="h-4 w-4" strokeWidth={1.75} /> },
+  { label: "My Leads", href: "/employee/leads", icon: <Users className="h-4 w-4" strokeWidth={1.75} /> },
+  { label: "My Applications", href: "/employee/applications", icon: <ClipboardList className="h-4 w-4" strokeWidth={1.75} /> },
 ];
 
 export default async function EmployeeLayout({ children }: { children: React.ReactNode }) {

@@ -4,10 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { DashboardShell } from "@/components/shared/dashboard-shell";
 
 const NAV = [
-  { label: "Overview", href: "/agent", icon: LayoutDashboard },
-  { label: "Refer a customer", href: "/agent/refer", icon: UserPlus },
-  { label: "My referrals", href: "/agent/referrals", icon: Users },
-  { label: "Commissions", href: "/agent/commissions", icon: IndianRupee },
+  { label: "Overview", href: "/agent", icon: <LayoutDashboard className="h-4 w-4" strokeWidth={1.75} /> },
+  { label: "Refer a customer", href: "/agent/refer", icon: <UserPlus className="h-4 w-4" strokeWidth={1.75} /> },
+  { label: "My referrals", href: "/agent/referrals", icon: <Users className="h-4 w-4" strokeWidth={1.75} /> },
+  { label: "Commissions", href: "/agent/commissions", icon: <IndianRupee className="h-4 w-4" strokeWidth={1.75} /> },
 ];
 
 export default async function AgentLayout({ children }: { children: React.ReactNode }) {
