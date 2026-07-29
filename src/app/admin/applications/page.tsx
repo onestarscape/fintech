@@ -7,7 +7,8 @@ export default async function AdminApplicationsPage() {
   const { data: applications } = await supabase
     .from("applications")
     .select("*, products(name), leads(full_name, phone)").returns<any[]>()
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   return (
     <div>

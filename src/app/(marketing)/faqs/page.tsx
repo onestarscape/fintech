@@ -1,5 +1,11 @@
 import { ContentPage } from "@/components/shared/content-page";
 
+export const metadata = {
+  title: "FAQs — Finlyst",
+  description: "Answers to common questions about applying through Finlyst.",
+};
+
+
 const FAQS = [
   {
     q: "Is Finlyst a bank?",

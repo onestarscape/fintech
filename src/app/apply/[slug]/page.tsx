@@ -1,5 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { getProductBySlug } from "@/lib/data/products";
 import { ApplyFlow } from "@/components/shared/apply-flow";
 
 export default async function ApplyPage({
@@ -21,12 +22,7 @@ export default async function ApplyPage({
     redirect(`/login?redirect=${encodeURIComponent(`/apply/${slug}`)}`);
   }
 
-  const { data: product } = await supabase
-    .from("products")
-    .select("*")
-    .eq("slug", slug)
-    .eq("is_active", true)
-    .single();
+  const product = await getProductBySlug(slug);
 
   if (!product) notFound();
 

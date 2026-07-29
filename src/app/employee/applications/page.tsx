@@ -13,6 +13,7 @@ export default async function EmployeeApplicationsPage() {
     .select("*, products(name), leads(full_name, phone)")
     .eq("assigned_rm_id", user!.id)
     .order("created_at", { ascending: false })
+    .limit(100)
     .returns<any[]>();
 
   return (

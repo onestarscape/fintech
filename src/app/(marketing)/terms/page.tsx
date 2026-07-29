@@ -1,5 +1,11 @@
 import { ContentPage } from "@/components/shared/content-page";
 
+export const metadata = {
+  title: "Terms & Conditions — Finlyst",
+  description: "The terms governing use of the Finlyst platform.",
+};
+
+
 export default function TermsPage() {
   return (
     <ContentPage eyebrow="Legal" title="Terms & Conditions">

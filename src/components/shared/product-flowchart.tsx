@@ -33,18 +33,18 @@ const CATEGORIES: FlowCategory[] = [
   {
     label: "Insurance",
     products: [
-      { label: "Life Insurance" },
-      { label: "Health Insurance" },
-      { label: "Motor Insurance" },
-      { label: "General Insurance" },
+      { label: "Life Insurance", slug: "life-insurance" },
+      { label: "Health Insurance", slug: "health-insurance" },
+      { label: "Motor Insurance", slug: "motor-insurance" },
+      { label: "General Insurance", slug: "general-insurance" },
     ],
   },
   {
     label: "Bank Accounts",
     products: [
-      { label: "Savings Account" },
-      { label: "Current Account" },
-      { label: "Corporate Banking" },
+      { label: "Savings Account", slug: "savings-account" },
+      { label: "Current Account", slug: "current-account" },
+      { label: "Corporate Banking", slug: "corporate-banking" },
     ],
   },
 ];

@@ -2,6 +2,12 @@ import { ContentPage } from "@/components/shared/content-page";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
+export const metadata = {
+  title: "Contact — Finlyst",
+  description: "Get in touch with the Finlyst team.",
+};
+
+
 export default function ContactPage() {
   return (
     <ContentPage eyebrow="Contact" title="Talk to us">

@@ -31,6 +31,7 @@ export interface RequiredDocumentDef {
   key: string;
   label: string;
   required: boolean;
+  section: string;
 }
 
 export interface Database {

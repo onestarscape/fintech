@@ -6,7 +6,8 @@ export default async function AdminLeadsPage() {
   const { data: leads } = await supabase
     .from("leads")
     .select("*, products(name)").returns<any[]>()
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .limit(100);
 
   return (
     <div>

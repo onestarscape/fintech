@@ -19,6 +19,7 @@ export default async function EmployeeLeadsPage() {
       .select("*, products(name), follow_ups(*)")
       .eq("assigned_to", user!.id)
       .order("created_at", { ascending: false })
+    .limit(100)
       .returns<any[]>(),
     supabase
       .from("leads")

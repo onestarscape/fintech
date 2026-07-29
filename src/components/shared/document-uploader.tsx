@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Upload, CheckCircle2 } from "lucide-react";
+import { useMemo, useState } from "react";
+import { Upload, CheckCircle2, ShieldCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { RequiredDocumentDef } from "@/types/database";
 
@@ -27,6 +27,16 @@ export function DocumentUploader({
   const [busyKey, setBusyKey] = useState<string | null>(null);
   const [done, setDone] = useState<string[]>(uploadedKeys);
   const [error, setError] = useState<string | null>(null);
+
+  const sections = useMemo(() => {
+    const map = new Map<string, RequiredDocumentDef[]>();
+    for (const doc of requiredDocuments) {
+      const key = doc.section || "Documents";
+      if (!map.has(key)) map.set(key, []);
+      map.get(key)!.push(doc);
+    }
+    return Array.from(map.entries());
+  }, [requiredDocuments]);
 
   async function handleUpload(doc: RequiredDocumentDef, file: File) {
     setBusyKey(doc.key);
@@ -68,39 +78,57 @@ export function DocumentUploader({
   }
 
   return (
-    <div className="space-y-2">
-      {requiredDocuments.map((doc) => {
-        const isDone = done.includes(doc.key);
-        const isBusy = busyKey === doc.key;
-        return (
-          <label
-            key={doc.key}
-            className="flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] border border-line px-4 py-3 text-sm hover:bg-black/[0.02]"
-          >
-            <span className="flex items-center gap-2">
-              {isDone ? (
-                <CheckCircle2 className="h-4 w-4 text-success" />
-              ) : (
-                <Upload className="h-4 w-4 text-muted" />
-              )}
-              {doc.label}
-              {!doc.required && <span className="text-xs text-muted">(optional)</span>}
-            </span>
-            <span className="text-xs font-medium text-accent">
-              {isBusy ? "Uploading…" : isDone ? "Uploaded — click to replace" : "Upload"}
-            </span>
-            <input
-              type="file"
-              className="hidden"
-              disabled={isBusy}
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleUpload(doc, file);
-              }}
-            />
-          </label>
-        );
-      })}
+    <div className="space-y-5">
+      <div className="flex items-start gap-2 rounded-[var(--radius-sm)] bg-accent-soft/60 px-3.5 py-2.5 text-xs text-ink/70">
+        <ShieldCheck className="mt-0.5 h-3.5 w-3.5 shrink-0 text-accent" />
+        <p>
+          Documents are stored encrypted and are only visible to you and
+          your assigned relationship manager. They are permanently deleted
+          if you delete your account.
+        </p>
+      </div>
+
+      {sections.map(([section, docs]) => (
+        <div key={section}>
+          <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
+            {section}
+          </p>
+          <div className="space-y-2">
+            {docs.map((doc) => {
+              const isDone = done.includes(doc.key);
+              const isBusy = busyKey === doc.key;
+              return (
+                <label
+                  key={doc.key}
+                  className="flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] border border-line px-4 py-3 text-sm hover:bg-black/[0.02]"
+                >
+                  <span className="flex items-center gap-2">
+                    {isDone ? (
+                      <CheckCircle2 className="h-4 w-4 text-success" />
+                    ) : (
+                      <Upload className="h-4 w-4 text-muted" />
+                    )}
+                    {doc.label}
+                    {!doc.required && <span className="text-xs text-muted">(optional)</span>}
+                  </span>
+                  <span className="text-xs font-medium text-accent">
+                    {isBusy ? "Uploading…" : isDone ? "Uploaded — click to replace" : "Upload"}
+                  </span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    disabled={isBusy}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) handleUpload(doc, file);
+                    }}
+                  />
+                </label>
+              );
+            })}
+          </div>
+        </div>
+      ))}
       {error && <p className="text-xs text-danger">{error}</p>}
     </div>
   );

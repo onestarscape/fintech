@@ -13,6 +13,7 @@ export default async function AdminAgentsPage() {
       .from("agents")
       .select("*, profiles!agents_id_fkey(full_name, phone)")
       .order("created_at", { ascending: false })
+    .limit(100)
       .returns<any[]>(),
     supabase
       .from("commissions")

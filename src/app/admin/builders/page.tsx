@@ -10,6 +10,7 @@ export default async function AdminBuildersPage() {
     .from("builders")
     .select("*, profiles!builders_id_fkey(full_name, phone), projects(id, name)")
     .order("created_at", { ascending: false })
+    .limit(100)
     .returns<any[]>();
 
   return (

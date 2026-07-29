@@ -1,5 +1,11 @@
 import { ContentPage } from "@/components/shared/content-page";
 
+export const metadata = {
+  title: "About — Finlyst",
+  description: "Who Finlyst is and how we work with partner banks and insurers.",
+};
+
+
 export default function AboutPage() {
   return (
     <ContentPage eyebrow="About" title="Finance, made simple.">

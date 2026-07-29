@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
 import { ProductCard } from "@/components/shared/product-card";
 import { Timeline } from "@/components/shared/timeline";
 import { ProductFlowchart } from "@/components/shared/product-flowchart";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getActiveProducts, getActivePartners } from "@/lib/data/products";
 
 const JOURNEY = [
   { label: "Apply", state: "done" as const },
@@ -15,20 +15,7 @@ const JOURNEY = [
 ];
 
 export default async function HomePage() {
-  const supabase = await createClient();
-
-  const [{ data: products }, { data: partners }] = await Promise.all([
-    supabase
-      .from("products")
-      .select("*")
-      .eq("is_active", true)
-      .order("display_order"),
-    supabase
-      .from("partners")
-      .select("*")
-      .eq("is_active", true)
-      .order("display_order"),
-  ]);
+  const [products, partners] = await Promise.all([getActiveProducts(), getActivePartners()]);
 
   return (
     <>

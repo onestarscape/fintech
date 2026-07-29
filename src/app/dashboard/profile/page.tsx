@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { updateProfile } from "@/lib/actions/profile";
+import { DeleteAccountForm } from "@/components/shared/delete-account-form";
 
 export default async function ProfilePage() {
   const supabase = await createClient();
@@ -44,6 +45,18 @@ export default async function ProfilePage() {
             Save changes
           </Button>
         </form>
+      </Card>
+
+      <Card className="mt-6 border-danger/30 p-6">
+        <h2 className="text-sm font-semibold text-danger">Danger zone</h2>
+        <p className="mt-1.5 text-sm text-muted">
+          Permanently deletes your account, applications, and every
+          document you&apos;ve uploaded — including the actual files, not
+          just the records. This cannot be undone.
+        </p>
+        <div className="mt-4">
+          <DeleteAccountForm />
+        </div>
       </Card>
     </div>
   );
