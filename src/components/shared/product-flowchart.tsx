@@ -2,52 +2,16 @@
 
 import { motion } from "framer-motion";
 import Link from "next/link";
+import type { Database } from "@/types/database";
 
-/**
- * Data-driven by design, matching the Dynamic Product Engine philosophy:
- * adding a product to this marketing diagram is a one-line edit here, not
- * a layout rebuild. `slug` links to a live product page; omit it for
- * products not yet launched (they render as "Coming soon").
- */
-interface FlowProduct {
-  label: string;
-  slug?: string;
-}
-interface FlowCategory {
-  label: string;
-  products: FlowProduct[];
-}
+type Product = Database["public"]["Tables"]["products"]["Row"];
 
-const CATEGORIES: FlowCategory[] = [
-  {
-    label: "Loans",
-    products: [
-      { label: "Home Loan", slug: "home-loan" },
-      { label: "Personal Loan", slug: "personal-loan" },
-      { label: "Business Loan", slug: "business-loan" },
-      { label: "Vehicle Loan" },
-      { label: "Education Loan" },
-      { label: "Gold Loan" },
-    ],
-  },
-  {
-    label: "Insurance",
-    products: [
-      { label: "Life Insurance", slug: "life-insurance" },
-      { label: "Health Insurance", slug: "health-insurance" },
-      { label: "Motor Insurance", slug: "motor-insurance" },
-      { label: "General Insurance", slug: "general-insurance" },
-    ],
-  },
-  {
-    label: "Bank Accounts",
-    products: [
-      { label: "Savings Account", slug: "savings-account" },
-      { label: "Current Account", slug: "current-account" },
-      { label: "Corporate Banking", slug: "corporate-banking" },
-    ],
-  },
-];
+const CATEGORY_LABELS: Record<string, string> = {
+  Loan: "Loans",
+  Insurance: "Insurance",
+  Account: "Bank Accounts",
+};
+const CATEGORY_ORDER = ["Loan", "Insurance", "Account"];
 
 // ---- Layout math -----------------------------------------------------------
 // Deterministic tree layout: each category's vertical position is the
@@ -60,21 +24,30 @@ const CATEGORY_X = 300;
 const PRODUCT_X = 560;
 const NODE_PAD_TOP = 24;
 
-function buildLayout() {
+function buildLayout(products: Product[]) {
+  const grouped = CATEGORY_ORDER.map((cat) => ({
+    label: CATEGORY_LABELS[cat] ?? cat,
+    items: products
+      .filter((p) => p.category === cat)
+      .sort((a, b) => a.display_order - b.display_order),
+  })).filter((g) => g.items.length > 0);
+
   let y = NODE_PAD_TOP;
-  const categories = CATEGORIES.map((cat) => {
+  const categories = grouped.map((cat) => {
     const startY = y;
-    const productNodes = cat.products.map((p) => {
+    const productNodes = cat.items.map((p) => {
       const py = y;
       y += ROW_H;
-      return { ...p, y: py };
+      return { slug: p.slug, label: p.name, y: py };
     });
     const endY = y - ROW_H;
     const categoryY = (startY + endY) / 2;
     return { label: cat.label, y: categoryY, products: productNodes };
   });
   const totalHeight = y + NODE_PAD_TOP - ROW_H + 24;
-  const rootY = (categories[0].y + categories[categories.length - 1].y) / 2;
+  const rootY = categories.length
+    ? (categories[0].y + categories[categories.length - 1].y) / 2
+    : NODE_PAD_TOP;
   return { categories, totalHeight, rootY };
 }
 
@@ -83,9 +56,11 @@ function bezierPath(x1: number, y1: number, x2: number, y2: number) {
   return `M ${x1} ${y1} C ${midX} ${y1}, ${midX} ${y2}, ${x2} ${y2}`;
 }
 
-export function ProductFlowchart() {
-  const { categories, totalHeight, rootY } = buildLayout();
+export function ProductFlowchart({ products }: { products: Product[] }) {
+  const { categories, totalHeight, rootY } = buildLayout(products);
   const width = PRODUCT_X + 220;
+
+  if (!categories.length) return null;
 
   return (
     <div className="overflow-x-auto">
@@ -114,7 +89,7 @@ export function ProductFlowchart() {
         {categories.map((cat) =>
           cat.products.map((p, i) => (
             <motion.path
-              key={`${cat.label}-${p.label}`}
+              key={`${cat.label}-${p.slug}`}
               d={bezierPath(CATEGORY_X + 96, cat.y, PRODUCT_X - 8, p.y)}
               stroke="var(--line)"
               strokeWidth={1.5}
@@ -142,25 +117,17 @@ export function ProductFlowchart() {
           </foreignObject>
         ))}
 
-        {/* Product leaf nodes */}
+        {/* Product leaf nodes — every one here is a real, live product */}
         {categories.map((cat) =>
           cat.products.map((p) => (
-            <foreignObject key={p.label} x={PRODUCT_X - 8} y={p.y - 16} width={216} height={32}>
-              {p.slug ? (
-                <Link
-                  href={`/products/${p.slug}`}
-                  className="flex h-8 items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm font-medium text-ink transition-colors hover:border-accent hover:text-accent"
-                >
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
-                  {p.label}
-                </Link>
-              ) : (
-                <div className="flex h-8 items-center gap-2 rounded-[var(--radius-sm)] px-3 text-sm text-muted">
-                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-line" />
-                  {p.label}
-                  <span className="ml-auto text-[10px] uppercase tracking-wide">soon</span>
-                </div>
-              )}
+            <foreignObject key={p.slug} x={PRODUCT_X - 8} y={p.y - 16} width={216} height={32}>
+              <Link
+                href={`/products/${p.slug}`}
+                className="flex h-8 items-center gap-2 rounded-[var(--radius-sm)] border border-line bg-surface px-3 text-sm font-medium text-ink transition-colors hover:border-accent hover:text-accent"
+              >
+                <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-success" />
+                {p.label}
+              </Link>
             </foreignObject>
           ))
         )}
