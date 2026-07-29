@@ -16,6 +16,7 @@ export interface NavItem {
   // can't cross the server -> client boundary as a prop, only a rendered
   // element can.
   icon: React.ReactNode;
+  badge?: number;
 }
 
 function NavLinks({ navItems, onNavigate }: { navItems: NavItem[]; onNavigate?: () => void }) {
@@ -35,7 +36,12 @@ function NavLinks({ navItems, onNavigate }: { navItems: NavItem[]; onNavigate?: 
             )}
           >
             {item.icon}
-            {item.label}
+            <span className="flex-1">{item.label}</span>
+            {!!item.badge && (
+              <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1.5 text-[11px] font-semibold text-white">
+                {item.badge > 9 ? "9+" : item.badge}
+              </span>
+            )}
           </Link>
         );
       })}

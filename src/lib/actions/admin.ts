@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { notifyUser } from "@/lib/notifications";
 import type { ApplicationStatus } from "@/types/database";
 
 export async function updateApplicationStatus(formData: FormData) {
@@ -15,10 +16,12 @@ export async function updateApplicationStatus(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { error } = await supabase
+  const { data: application, error } = await supabase
     .from("applications")
     .update({ status, current_stage: stage || null })
-    .eq("id", applicationId);
+    .eq("id", applicationId)
+    .select("user_id, products(name)")
+    .single<any>();
 
   if (!error) {
     await supabase.from("status_history").insert({
@@ -28,6 +31,14 @@ export async function updateApplicationStatus(formData: FormData) {
       note: note || null,
       changed_by: user?.id,
     });
+
+    await notifyUser(
+      supabase,
+      application?.user_id,
+      `${application?.products?.name ?? "Your application"} — status updated`,
+      `Now: ${status.replace(/_/g, " ")}${stage ? ` · ${stage}` : ""}`,
+      `/dashboard/applications/${applicationId}`
+    );
   }
 
   revalidatePath(`/admin/applications/${applicationId}`);
@@ -38,10 +49,22 @@ export async function assignRelationshipManager(formData: FormData) {
   const rmId = String(formData.get("rm_id"));
 
   const supabase = await createClient();
-  await supabase
+  const { data: application } = await supabase
     .from("applications")
     .update({ assigned_rm_id: rmId || null })
-    .eq("id", applicationId);
+    .eq("id", applicationId)
+    .select("user_id, products(name)")
+    .single<any>();
+
+  if (rmId) {
+    await notifyUser(
+      supabase,
+      application?.user_id,
+      `A relationship manager has been assigned`,
+      `Your ${application?.products?.name ?? "application"} now has a dedicated point of contact.`,
+      `/dashboard/applications/${applicationId}`
+    );
+  }
 
   revalidatePath(`/admin/applications/${applicationId}`);
 }
@@ -55,10 +78,20 @@ export async function verifyDocument(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  await supabase
+  const { data: document } = await supabase
     .from("documents")
     .update({ verified: true, verified_by: user?.id })
-    .eq("id", documentId);
+    .eq("id", documentId)
+    .select("label, applications(user_id)")
+    .single<any>();
+
+  await notifyUser(
+    supabase,
+    document?.applications?.user_id,
+    "Document verified",
+    `${document?.label ?? "Your document"} has been verified.`,
+    `/dashboard/applications/${applicationId}`
+  );
 
   revalidatePath(`/admin/applications/${applicationId}`);
 }
@@ -83,6 +116,14 @@ export async function approveAgent(formData: FormData) {
     .eq("id", agentId);
 
   await supabase.from("profiles").update({ role: "agent" }).eq("id", agentId);
+
+  await notifyUser(
+    supabase,
+    agentId,
+    "You're approved as an agent",
+    `Your commission rate is set at ${commissionRate}%. Start referring customers from your agent portal.`,
+    "/agent"
+  );
 
   revalidatePath("/admin/agents");
 }
@@ -115,16 +156,36 @@ export async function logCommission(formData: FormData) {
     created_by: user?.id,
   });
 
+  await notifyUser(
+    supabase,
+    agentId,
+    "Commission logged",
+    `₹${commissionAmount.toLocaleString("en-IN")} commission logged for a disbursed application.`,
+    "/agent/commissions"
+  );
+
   revalidatePath(`/admin/applications/${applicationId}`);
 }
 
 export async function markCommissionPaid(formData: FormData) {
   const commissionId = String(formData.get("commission_id"));
   const supabase = await createClient();
-  await supabase
+
+  const { data: commission } = await supabase
     .from("commissions")
     .update({ status: "paid", paid_at: new Date().toISOString() })
-    .eq("id", commissionId);
+    .eq("id", commissionId)
+    .select("agent_id, commission_amount")
+    .single();
+
+  await notifyUser(
+    supabase,
+    commission?.agent_id,
+    "Commission paid",
+    `₹${Number(commission?.commission_amount ?? 0).toLocaleString("en-IN")} has been marked as paid.`,
+    "/agent/commissions"
+  );
+
   revalidatePath("/admin/agents");
 }
 
@@ -141,6 +202,14 @@ export async function approveBuilder(formData: FormData) {
     .eq("id", builderId);
 
   await supabase.from("profiles").update({ role: "builder" }).eq("id", builderId);
+
+  await notifyUser(
+    supabase,
+    builderId,
+    "You're approved as a builder partner",
+    "Register your projects and start submitting bulk loan requests from your builder portal.",
+    "/builder"
+  );
 
   revalidatePath("/admin/builders");
 }

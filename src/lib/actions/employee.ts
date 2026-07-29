@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { notifyUser } from "@/lib/notifications";
 
 export async function addFollowUp(formData: FormData) {
   const leadId = String(formData.get("lead_id") ?? "") || null;
@@ -57,6 +58,32 @@ export async function updateLeadStatus(formData: FormData) {
   const leadId = String(formData.get("lead_id"));
   const status = String(formData.get("status")) as import("@/types/database").LeadStatus;
   const supabase = await createClient();
-  await supabase.from("leads").update({ status }).eq("id", leadId);
+
+  const { data: lead } = await supabase
+    .from("leads")
+    .update({ status })
+    .eq("id", leadId)
+    .select("full_name, agent_id, projects(builder_id)")
+    .single<any>();
+
+  if (lead?.agent_id) {
+    await notifyUser(
+      supabase,
+      lead.agent_id,
+      "Referral status updated",
+      `${lead.full_name} is now marked as "${status}".`,
+      "/agent/referrals"
+    );
+  }
+  if (lead?.projects?.builder_id) {
+    await notifyUser(
+      supabase,
+      lead.projects.builder_id,
+      "Loan request status updated",
+      `${lead.full_name} is now marked as "${status}".`,
+      "/builder/analytics"
+    );
+  }
+
   revalidatePath("/employee/leads");
 }

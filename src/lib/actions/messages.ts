@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { notifyUser } from "@/lib/notifications";
 
 export async function sendMessage(formData: FormData) {
   const applicationId = String(formData.get("application_id"));
@@ -19,6 +20,24 @@ export async function sendMessage(formData: FormData) {
     sender_id: user.id,
     body,
   });
+
+  // Notify the customer only when the sender isn't them (i.e. staff
+  // replied) — no point notifying someone about their own message.
+  const { data: application } = await supabase
+    .from("applications")
+    .select("user_id, products(name)")
+    .eq("id", applicationId)
+    .single<any>();
+
+  if (application?.user_id && application.user_id !== user.id) {
+    await notifyUser(
+      supabase,
+      application.user_id,
+      `New message about your ${application.products?.name ?? "application"}`,
+      body.slice(0, 120),
+      `/dashboard/messages/${applicationId}`
+    );
+  }
 
   revalidatePath(`/dashboard/messages/${applicationId}`);
   revalidatePath(`/admin/applications/${applicationId}`);
