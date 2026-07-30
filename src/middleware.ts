@@ -3,6 +3,28 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
+  const path = request.nextUrl.pathname;
+
+  // ---------------------------------------------------------------------
+  // ADMIN GATE — a separate, dedicated username/password lock in front of
+  // /admin, entirely independent of the regular customer/agent/builder
+  // account system. Passing this gate does NOT grant any data access by
+  // itself (RLS + the profiles.role='admin' check below still fully
+  // apply) — it's an extra locked door before anyone even reaches the
+  // login form, restricted to whoever is given these exact credentials.
+  // ---------------------------------------------------------------------
+  const isAdminPath = path === "/admin" || path.startsWith("/admin/");
+
+  if (isAdminPath) {
+    const gateCookie = request.cookies.get("admin_gate")?.value;
+    const expectedToken = process.env.ADMIN_GATE_TOKEN;
+
+    if (!expectedToken || gateCookie !== expectedToken) {
+      const gateUrl = new URL("/admin-gate", request.url);
+      gateUrl.searchParams.set("redirect", path);
+      return NextResponse.redirect(gateUrl);
+    }
+  }
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -28,11 +50,9 @@ export async function middleware(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
-  const path = request.nextUrl.pathname;
   const isProtected =
     path.startsWith("/dashboard") ||
-    path.startsWith("/admin") ||
+    isAdminPath ||
     path.startsWith("/employee") ||
     path.startsWith("/agent") ||
     path.startsWith("/builder");
@@ -46,7 +66,7 @@ export async function middleware(request: NextRequest) {
   // Coarse role gate at the edge; RLS does the rest server-side. This just
   // avoids flashing the wrong panel before a redirect.
   if (
-    (path.startsWith("/admin") ||
+    (isAdminPath ||
       path.startsWith("/employee") ||
       path.startsWith("/agent") ||
       path.startsWith("/builder")) &&
@@ -65,7 +85,7 @@ export async function middleware(request: NextRequest) {
       builder: "/builder",
     };
 
-    if (path.startsWith("/admin") && role !== "admin") {
+    if (isAdminPath && role !== "admin") {
       return NextResponse.redirect(new URL(homeFor[role ?? ""] ?? "/dashboard", request.url));
     }
 
