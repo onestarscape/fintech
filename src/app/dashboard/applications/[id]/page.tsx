@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -101,17 +102,35 @@ export default async function ApplicationDetailPage({
             )}
           </Card>
 
-          <Card className="p-6">
-            <h2 className="text-sm font-semibold">Documents</h2>
-            <div className="mt-4">
-              <DocumentUploader
-                applicationId={application.id}
-                customerName={customerName}
-                requiredDocuments={requiredDocs}
-                uploadedKeys={uploadedKeys}
-              />
-            </div>
-          </Card>
+          {requiredDocs.length > 0 ? (
+            <Card className="p-6">
+              <h2 className="text-sm font-semibold">Documents</h2>
+              <div className="mt-4">
+                <DocumentUploader
+                  applicationId={application.id}
+                  customerName={customerName}
+                  requiredDocuments={requiredDocs}
+                  uploadedKeys={uploadedKeys}
+                />
+              </div>
+            </Card>
+          ) : (
+            <Card className="p-6">
+              <h2 className="text-sm font-semibold">What happens next</h2>
+              <p className="mt-3 text-sm text-muted">
+                No documents needed for this request. Our team will process
+                it and message you here with the result — check your{" "}
+                <Link href="/dashboard/messages" className="text-accent">
+                  Messages
+                </Link>{" "}
+                and{" "}
+                <Link href="/dashboard/notifications" className="text-accent">
+                  Notifications
+                </Link>{" "}
+                for updates.
+              </p>
+            </Card>
+          )}
         </div>
       </div>
     </div>

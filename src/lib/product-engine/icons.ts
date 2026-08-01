@@ -1,4 +1,4 @@
-import { Home, Wallet, Briefcase, Car, ShieldCheck, GraduationCap, Coins, Landmark, type LucideIcon } from "lucide-react";
+import { Home, Wallet, Briefcase, Car, ShieldCheck, GraduationCap, Coins, Landmark, Gauge, type LucideIcon } from "lucide-react";
 import { createElement, type ReactNode } from "react";
 
 // Maps the `icon` string stored on a product row (Dynamic Product Engine)
@@ -13,6 +13,7 @@ export const PRODUCT_ICONS: Record<string, LucideIcon> = {
   GraduationCap,
   Coins,
   Landmark,
+  Gauge,
 };
 
 export function getProductIcon(name: string | null): LucideIcon {

@@ -147,35 +147,52 @@ export function ApplyFlow({ product }: { product: Product }) {
         <div className="mt-8 space-y-4">
           {schema.map((field) => (
             <div key={field.key}>
-              <Label htmlFor={field.key}>{field.label}</Label>
-              {field.type === "select" ? (
-                <Select
-                  id={field.key}
-                  required={field.required}
-                  value={productData[field.key] ?? ""}
-                  onChange={(e) =>
-                    setProductData({ ...productData, [field.key]: e.target.value })
-                  }
-                >
-                  <option value="" disabled>
-                    Select…
-                  </option>
-                  {field.options?.map((opt) => (
-                    <option key={opt} value={opt}>
-                      {opt}
-                    </option>
-                  ))}
-                </Select>
+              {field.type === "checkbox" ? (
+                <label className="flex items-start gap-2.5 text-sm text-ink/80">
+                  <input
+                    type="checkbox"
+                    required={field.required}
+                    checked={productData[field.key] === "true"}
+                    onChange={(e) =>
+                      setProductData({ ...productData, [field.key]: e.target.checked ? "true" : "false" })
+                    }
+                    className="mt-0.5 h-4 w-4 shrink-0 rounded border-line text-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                  />
+                  {field.label}
+                </label>
               ) : (
-                <Input
-                  id={field.key}
-                  type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
-                  required={field.required}
-                  value={productData[field.key] ?? ""}
-                  onChange={(e) =>
-                    setProductData({ ...productData, [field.key]: e.target.value })
-                  }
-                />
+                <>
+                  <Label htmlFor={field.key}>{field.label}</Label>
+                  {field.type === "select" ? (
+                    <Select
+                      id={field.key}
+                      required={field.required}
+                      value={productData[field.key] ?? ""}
+                      onChange={(e) =>
+                        setProductData({ ...productData, [field.key]: e.target.value })
+                      }
+                    >
+                      <option value="" disabled>
+                        Select…
+                      </option>
+                      {field.options?.map((opt) => (
+                        <option key={opt} value={opt}>
+                          {opt}
+                        </option>
+                      ))}
+                    </Select>
+                  ) : (
+                    <Input
+                      id={field.key}
+                      type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
+                      required={field.required}
+                      value={productData[field.key] ?? ""}
+                      onChange={(e) =>
+                        setProductData({ ...productData, [field.key]: e.target.value })
+                      }
+                    />
+                  )}
+                </>
               )}
             </div>
           ))}
@@ -200,7 +217,10 @@ export function ApplyFlow({ product }: { product: Product }) {
             <div className="mt-4 space-y-1.5 border-t border-line pt-4">
               {schema.map((f) => (
                 <p key={f.key} className="text-sm text-muted">
-                  <span className="text-ink">{f.label}:</span> {productData[f.key] || "—"}
+                  <span className="text-ink">{f.label}:</span>{" "}
+                  {f.type === "checkbox"
+                    ? productData[f.key] === "true" ? "Yes" : "No"
+                    : productData[f.key] || "—"}
                 </p>
               ))}
             </div>

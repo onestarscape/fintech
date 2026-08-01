@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Gauge } from "lucide-react";
 import { ProductCard } from "@/components/shared/product-card";
 import { Timeline } from "@/components/shared/timeline";
 import { ProductFlowchart } from "@/components/shared/product-flowchart";
@@ -15,7 +16,9 @@ const JOURNEY = [
 ];
 
 export default async function HomePage() {
-  const [products, partners] = await Promise.all([getActiveProducts(), getActivePartners()]);
+  const [allProducts, partners] = await Promise.all([getActiveProducts(), getActivePartners()]);
+  const products = allProducts.filter((p) => p.category !== "Credit Score");
+  const cibilProduct = allProducts.find((p) => p.slug === "cibil-score-check");
 
   return (
     <>
@@ -58,6 +61,34 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* FREE CIBIL SCORE CHECK — a lead magnet, not a partner product */}
+      {cibilProduct && (
+        <section className="mx-auto max-w-6xl px-6 pb-16">
+          <div className="flex flex-col items-center gap-6 rounded-[var(--radius-lg)] border border-accent/20 bg-accent-soft/60 p-8 text-center sm:flex-row sm:justify-between sm:text-left">
+            <div className="flex items-center gap-4">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[var(--radius-md)] bg-ink text-paper">
+                <Gauge className="h-6 w-6" strokeWidth={1.75} />
+              </span>
+              <div>
+                <p className="font-display text-lg font-semibold">
+                  Check your free CIBIL score
+                </p>
+                <p className="mt-1 text-sm text-muted">
+                  No cost, no impact on your score. Our team checks it and
+                  sends you the result directly.
+                </p>
+              </div>
+            </div>
+            <Link
+              href={`/apply/${cibilProduct.slug}`}
+              className={cn(buttonVariants({ variant: "accent", size: "lg" }), "shrink-0")}
+            >
+              Check now — free
+            </Link>
+          </div>
+        </section>
+      )}
 
       {/* EVERYTHING WE COVER — full product taxonomy, pulled live from the DB */}
       <section className="mx-auto max-w-6xl px-6 py-16">

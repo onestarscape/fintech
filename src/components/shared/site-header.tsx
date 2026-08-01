@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 
 const LINKS = [
   { href: "/#products", label: "Products" },
+  { href: "/emi-calculator", label: "EMI Calculator" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
   { href: "/faqs", label: "FAQs" },

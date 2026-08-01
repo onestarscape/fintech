@@ -21,7 +21,7 @@ export type ApplicationStatus =
 export interface FormFieldDef {
   key: string;
   label: string;
-  type: "text" | "number" | "select" | "textarea" | "date";
+  type: "text" | "number" | "select" | "textarea" | "date" | "checkbox";
   required: boolean;
   options?: string[];
   step: number;
