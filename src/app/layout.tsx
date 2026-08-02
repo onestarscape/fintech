@@ -21,7 +21,7 @@ const plexMono = IBM_Plex_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Finlyst — Finance, made simple.",
+  title: "Fast Up Loans — Finance, made simple.",
   description:
     "Apply for home loans, business loans, insurance, and bank accounts from trusted partner banks and NBFCs — all in one place.",
 };

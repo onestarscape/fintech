@@ -7,7 +7,7 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <p className="font-display text-lg font-semibold">Finlyst</p>
+            <p className="font-display text-lg font-semibold">Fast Up Loans</p>
             <p className="mt-2 text-sm text-muted">Finance, made simple.</p>
           </div>
           <div>
@@ -36,7 +36,7 @@ export function SiteFooter() {
         </div>
         <div className="mt-10 flex flex-col items-start justify-between gap-4 border-t border-line pt-6 sm:flex-row sm:items-center">
           <p className="text-xs text-muted">
-            © {new Date().getFullYear()} Finlyst. Finlyst is a lead-generation and
+            © {new Date().getFullYear()} Fast Up Loans. Fast Up Loans is a lead-generation and
             application-facilitation platform; loans, insurance, and accounts are
             issued solely by our partner banks, NBFCs, and insurers, subject to
             their approval.

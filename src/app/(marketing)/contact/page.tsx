@@ -3,8 +3,8 @@ import { Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
 export const metadata = {
-  title: "Contact — Finlyst",
-  description: "Get in touch with the Finlyst team.",
+  title: "Contact — Fast Up Loans",
+  description: "Get in touch with the Fast Up Loans team.",
 };
 
 

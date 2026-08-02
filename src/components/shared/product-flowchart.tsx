@@ -104,7 +104,7 @@ export function ProductFlowchart({ products }: { products: Product[] }) {
         {/* Root node */}
         <foreignObject x={ROOT_X - 40} y={rootY - 22} width={148} height={44}>
           <div className="flex h-11 items-center justify-center rounded-[var(--radius-md)] bg-ink px-4 text-sm font-semibold text-paper font-display">
-            Finlyst
+            Fast Up Loans
           </div>
         </foreignObject>
 

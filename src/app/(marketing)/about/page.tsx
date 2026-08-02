@@ -1,8 +1,8 @@
 import { ContentPage } from "@/components/shared/content-page";
 
 export const metadata = {
-  title: "About — Finlyst",
-  description: "Who Finlyst is and how we work with partner banks and insurers.",
+  title: "About — Fast Up Loans",
+  description: "Who Fast Up Loans is and how we work with partner banks and insurers.",
 };
 
 
@@ -10,7 +10,7 @@ export default function AboutPage() {
   return (
     <ContentPage eyebrow="About" title="Finance, made simple.">
       <p>
-        Finlyst helps people find and apply for home loans, business loans,
+        Fast Up Loans helps people find and apply for home loans, business loans,
         insurance, and bank accounts — without visiting multiple banks or
         filling paper forms.
       </p>
@@ -23,7 +23,7 @@ export default function AboutPage() {
       <p>
         Loans, insurance policies, and accounts are underwritten and issued
         solely by our partner institutions, subject to their own approval
-        and terms. Finlyst facilitates the application; it is not a bank,
+        and terms. Fast Up Loans facilitates the application; it is not a bank,
         NBFC, or insurer.
       </p>
     </ContentPage>

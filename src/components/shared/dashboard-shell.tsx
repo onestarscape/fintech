@@ -77,7 +77,7 @@ export function DashboardShell({
       {/* Desktop sidebar — unchanged */}
       <aside className="hidden w-64 shrink-0 border-r border-line px-4 py-6 md:flex md:flex-col">
         <Link href={brandHref} className="font-display px-2 text-lg font-semibold">
-          Finlyst
+          Fast Up Loans
         </Link>
         <NavLinks navItems={navItems} />
         <div className="border-t border-line pt-4">
@@ -93,7 +93,7 @@ export function DashboardShell({
       {/* Mobile top bar */}
       <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-line bg-paper/95 px-4 backdrop-blur md:hidden">
         <Link href={brandHref} className="font-display text-base font-semibold">
-          Finlyst
+          Fast Up Loans
         </Link>
         <button
           type="button"

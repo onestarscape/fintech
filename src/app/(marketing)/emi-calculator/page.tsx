@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { EmiCalculator } from "@/components/shared/emi-calculator";
 
 export const metadata: Metadata = {
-  title: "EMI Calculator — Finlyst",
+  title: "EMI Calculator — Fast Up Loans",
   description: "Estimate your monthly EMI for a home, personal, or business loan.",
 };
 

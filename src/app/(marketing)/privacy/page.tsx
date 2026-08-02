@@ -1,8 +1,8 @@
 import { ContentPage } from "@/components/shared/content-page";
 
 export const metadata = {
-  title: "Privacy Policy — Finlyst",
-  description: "How Finlyst collects, uses, and protects your data.",
+  title: "Privacy Policy — Fast Up Loans",
+  description: "How Fast Up Loans collects, uses, and protects your data.",
 };
 
 

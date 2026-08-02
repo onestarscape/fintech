@@ -16,7 +16,7 @@ export async function generateMetadata({
   const product = await getProductBySlug(slug);
   if (!product) return {};
   return {
-    title: `${product.name} — Finlyst`,
+    title: `${product.name} — Fast Up Loans`,
     description: product.short_description ?? undefined,
   };
 }

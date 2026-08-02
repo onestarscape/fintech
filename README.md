@@ -1,10 +1,10 @@
-# Finlyst — Phase 0 (Foundation)
+# Fast Up Loans — Phase 0 (Foundation)
 
 A lead-generation and application-facilitation platform for loans, insurance,
 and bank accounts, built on a reusable **Dynamic Product Engine** — every
 financial product is a configured row in the database, not a code path.
 
-> "Finlyst" is a placeholder brand name — rename freely (see "Renaming the
+> "Fast Up Loans" is a placeholder brand name — rename freely (see "Renaming the
 > brand" below).
 
 ## What's in Phase 0
@@ -87,9 +87,9 @@ Visit http://localhost:3000.
 
 ## Renaming the brand
 
-"Finlyst" appears in: `src/app/layout.tsx` (metadata), `src/components/shared/site-header.tsx`,
+"Fast Up Loans" appears in: `src/app/layout.tsx` (metadata), `src/components/shared/site-header.tsx`,
 `src/components/shared/site-footer.tsx`, and the `(auth)` layout. A find-and-replace
-for "Finlyst" across `src/` covers it.
+for "Fast Up Loans" across `src/` covers it.
 
 ## Adding a new financial product (the point of the Dynamic Product Engine)
 

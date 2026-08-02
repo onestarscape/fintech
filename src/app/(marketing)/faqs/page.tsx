@@ -1,19 +1,19 @@
 import { ContentPage } from "@/components/shared/content-page";
 
 export const metadata = {
-  title: "FAQs — Finlyst",
-  description: "Answers to common questions about applying through Finlyst.",
+  title: "FAQs — Fast Up Loans",
+  description: "Answers to common questions about applying through Fast Up Loans.",
 };
 
 
 const FAQS = [
   {
-    q: "Is Finlyst a bank?",
-    a: "No. Finlyst is a lead-generation and application-facilitation platform. Loans, insurance, and accounts are issued solely by our partner banks, NBFCs, and insurers.",
+    q: "Is Fast Up Loans a bank?",
+    a: "No. Fast Up Loans is a lead-generation and application-facilitation platform. Loans, insurance, and accounts are issued solely by our partner banks, NBFCs, and insurers.",
   },
   {
     q: "Does applying cost anything?",
-    a: "No — creating an account and submitting an application through Finlyst is free.",
+    a: "No — creating an account and submitting an application through Fast Up Loans is free.",
   },
   {
     q: "How long does approval take?",
