@@ -41,7 +41,7 @@ export default async function ApplicationDetailPage({
 
   const { data: documents } = await supabase
     .from("documents")
-    .select("doc_key")
+    .select("doc_key, status, rejection_reason")
     .eq("application_id", id);
 
   const product = application.products;
@@ -63,7 +63,7 @@ export default async function ApplicationDetailPage({
   });
 
   const requiredDocs = (product?.required_documents ?? []) as RequiredDocumentDef[];
-  const uploadedKeys = (documents ?? []).map((d) => d.doc_key);
+  const uploadedDocs = documents ?? [];
 
   const rm = application.assigned_rm;
 
@@ -110,7 +110,7 @@ export default async function ApplicationDetailPage({
                   applicationId={application.id}
                   customerName={customerName}
                   requiredDocuments={requiredDocs}
-                  uploadedKeys={uploadedKeys}
+                  uploadedDocs={uploadedDocs}
                 />
               </div>
             </Card>

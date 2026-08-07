@@ -80,7 +80,7 @@ export async function verifyDocument(formData: FormData) {
 
   const { data: document } = await supabase
     .from("documents")
-    .update({ verified: true, verified_by: user?.id })
+    .update({ status: "verified", rejection_reason: null, verified_by: user?.id })
     .eq("id", documentId)
     .select("label, applications(user_id)")
     .single<any>();
@@ -94,6 +94,40 @@ export async function verifyDocument(formData: FormData) {
   );
 
   revalidatePath(`/admin/applications/${applicationId}`);
+  revalidatePath("/admin/documents");
+}
+
+export async function rejectDocument(formData: FormData) {
+  const documentId = String(formData.get("document_id"));
+  const applicationId = String(formData.get("application_id"));
+  const reason = String(formData.get("reason") ?? "").trim();
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  const { data: document } = await supabase
+    .from("documents")
+    .update({
+      status: "rejected",
+      rejection_reason: reason || "No reason provided — please contact support.",
+      verified_by: user?.id,
+    })
+    .eq("id", documentId)
+    .select("label, applications(user_id)")
+    .single<any>();
+
+  await notifyUser(
+    supabase,
+    document?.applications?.user_id,
+    "Document needs attention",
+    `${document?.label ?? "A document"} was rejected: ${reason || "please re-upload."}`,
+    `/dashboard/applications/${applicationId}`
+  );
+
+  revalidatePath(`/admin/applications/${applicationId}`);
+  revalidatePath("/admin/documents");
 }
 
 export async function approveAgent(formData: FormData) {

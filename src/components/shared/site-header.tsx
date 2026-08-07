@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { buttonVariants } from "@/components/ui/button";
@@ -22,8 +23,8 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-40 border-b border-line/70 bg-paper/85 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="font-display text-lg font-semibold tracking-tight" onClick={() => setOpen(false)}>
-          Fast Up Loans
+        <Link href="/" className="flex items-center" onClick={() => setOpen(false)}>
+          <Image src="/fastuploans-logo.png" alt="Fast Up Loans" width={160} height={127} className="h-10 w-auto" priority />
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm font-medium text-ink/80 md:flex">

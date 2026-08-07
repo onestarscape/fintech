@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { signOut } from "@/lib/actions/auth";
@@ -76,8 +77,9 @@ export function DashboardShell({
     <div className="flex min-h-screen bg-paper">
       {/* Desktop sidebar — unchanged */}
       <aside className="hidden w-64 shrink-0 border-r border-line px-4 py-6 md:flex md:flex-col">
-        <Link href={brandHref} className="font-display px-2 text-lg font-semibold">
-          Fast Up Loans
+        <Link href={brandHref} className="flex items-center gap-2 px-2">
+          <Image src="/fastuploans-icon.png" alt="" width={28} height={28} className="h-7 w-7" />
+          <span className="font-display text-base font-semibold">Fast Up Loans</span>
         </Link>
         <NavLinks navItems={navItems} />
         <div className="border-t border-line pt-4">
@@ -92,8 +94,9 @@ export function DashboardShell({
 
       {/* Mobile top bar */}
       <div className="fixed inset-x-0 top-0 z-40 flex h-14 items-center justify-between border-b border-line bg-paper/95 px-4 backdrop-blur md:hidden">
-        <Link href={brandHref} className="font-display text-base font-semibold">
-          Fast Up Loans
+        <Link href={brandHref} className="flex items-center gap-2">
+          <Image src="/fastuploans-icon.png" alt="" width={24} height={24} className="h-6 w-6" />
+          <span className="font-display text-sm font-semibold">Fast Up Loans</span>
         </Link>
         <button
           type="button"

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
-import { verifyDocument } from "@/lib/actions/admin";
+import { verifyDocument, rejectDocument } from "@/lib/actions/admin";
 
 export default async function AdminDocumentsPage() {
   const supabase = await createClient();
@@ -25,7 +25,7 @@ export default async function AdminDocumentsPage() {
   );
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-5xl">
       <h1 className="font-display text-2xl font-semibold tracking-tight">Documents</h1>
       <p className="mt-1 text-sm text-muted">
         Every document uploaded across all applications. Download links expire after 10 minutes.
@@ -33,7 +33,7 @@ export default async function AdminDocumentsPage() {
 
       <div className="mt-6 overflow-hidden rounded-[var(--radius-lg)] border border-line">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[800px] text-sm">
             <thead className="border-b border-line bg-black/[0.02] text-left text-xs font-medium text-muted">
               <tr>
                 <th className="px-4 py-3">Customer</th>
@@ -50,7 +50,12 @@ export default async function AdminDocumentsPage() {
                   <td className="px-4 py-3 font-medium">
                     {doc.applications?.leads?.full_name ?? "—"}
                   </td>
-                  <td className="px-4 py-3">{doc.label}</td>
+                  <td className="px-4 py-3">
+                    {doc.label}
+                    {doc.status === "rejected" && doc.rejection_reason && (
+                      <p className="mt-0.5 text-xs text-danger">Reason: {doc.rejection_reason}</p>
+                    )}
+                  </td>
                   <td className="px-4 py-3 text-muted">{doc.applications?.products?.name}</td>
                   <td className="px-4 py-3 text-muted">
                     {new Date(doc.uploaded_at).toLocaleDateString("en-IN", {
@@ -60,8 +65,12 @@ export default async function AdminDocumentsPage() {
                     })}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge tone={doc.verified ? "success" : "warning"}>
-                      {doc.verified ? "Verified" : "Pending"}
+                    <Badge
+                      tone={
+                        doc.status === "verified" ? "success" : doc.status === "rejected" ? "danger" : "warning"
+                      }
+                    >
+                      {doc.status === "verified" ? "Verified" : doc.status === "rejected" ? "Rejected" : "Pending"}
                     </Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -76,14 +85,30 @@ export default async function AdminDocumentsPage() {
                           Download
                         </a>
                       )}
-                      {!doc.verified && (
-                        <form action={verifyDocument}>
-                          <input type="hidden" name="document_id" value={doc.id} />
-                          <input type="hidden" name="application_id" value={doc.applications?.id} />
-                          <button type="submit" className="text-xs font-medium text-accent">
-                            Verify
-                          </button>
-                        </form>
+                      {doc.status === "pending" && (
+                        <>
+                          <form action={verifyDocument}>
+                            <input type="hidden" name="document_id" value={doc.id} />
+                            <input type="hidden" name="application_id" value={doc.applications?.id} />
+                            <button type="submit" className="text-xs font-medium text-success">
+                              Verify
+                            </button>
+                          </form>
+                          <form action={rejectDocument} className="flex items-center gap-1">
+                            <input type="hidden" name="document_id" value={doc.id} />
+                            <input type="hidden" name="application_id" value={doc.applications?.id} />
+                            <input
+                              type="text"
+                              name="reason"
+                              required
+                              placeholder="Reason…"
+                              className="h-7 w-28 rounded-[var(--radius-sm)] border border-line bg-surface px-2 text-xs placeholder:text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-danger/40"
+                            />
+                            <button type="submit" className="text-xs font-medium text-danger">
+                              Reject
+                            </button>
+                          </form>
+                        </>
                       )}
                       <Link
                         href={`/admin/applications/${doc.applications?.id}`}

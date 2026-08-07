@@ -7,8 +7,8 @@ export function SiteFooter() {
       <div className="mx-auto max-w-6xl px-6 py-12">
         <div className="grid gap-10 sm:grid-cols-2 md:grid-cols-4">
           <div>
-            <p className="font-display text-lg font-semibold">Fast Up Loans</p>
-            <p className="mt-2 text-sm text-muted">Finance, made simple.</p>
+            <Image src="/fastuploans-logo.png" alt="Fast Up Loans" width={140} height={111} className="h-11 w-auto" />
+            <p className="mt-2 text-sm text-muted">Loans made simple.</p>
           </div>
           <div>
             <p className="text-sm font-medium">Company</p>
@@ -42,8 +42,8 @@ export function SiteFooter() {
             their approval.
           </p>
           <div className="flex shrink-0 items-center gap-2 text-xs text-muted">
-            <span>A brand by</span>
-            <Image src="/logo.png" alt="Starscape" width={72} height={38} className="opacity-70" />
+            <span>Powered by</span>
+            <Image src="/starscape-logo.png" alt="Starscape" width={72} height={38} className="opacity-70" />
           </div>
         </div>
       </div>

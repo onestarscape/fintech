@@ -6,7 +6,8 @@ import { Select, Input, Label } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Timeline, type TimelineStep } from "@/components/shared/timeline";
 import { MessageThread } from "@/components/shared/message-thread";
-import { updateApplicationStatus, assignRelationshipManager, verifyDocument, logCommission } from "@/lib/actions/admin";
+import { DocumentReviewList } from "@/components/shared/document-review-list";
+import { updateApplicationStatus, assignRelationshipManager, verifyDocument, rejectDocument, logCommission } from "@/lib/actions/admin";
 import type { ApplicationStatus, RequiredDocumentDef } from "@/types/database";
 
 const STATUS_OPTIONS: ApplicationStatus[] = [
@@ -145,28 +146,14 @@ export default async function AdminApplicationDetailPage({
 
           <Card className="p-6">
             <h2 className="text-sm font-semibold">Documents</h2>
-            <div className="mt-4 space-y-2">
-              {requiredDocs.map((doc) => {
-                const uploaded = documents?.find((d) => d.doc_key === doc.key);
-                return (
-                  <div key={doc.key} className="flex items-center justify-between rounded-[var(--radius-sm)] border border-line px-3 py-2 text-sm">
-                    <span>{doc.label}</span>
-                    {!uploaded ? (
-                      <span className="text-xs text-muted">Not uploaded</span>
-                    ) : uploaded.verified ? (
-                      <span className="text-xs font-medium text-success">Verified</span>
-                    ) : (
-                      <form action={verifyDocument}>
-                        <input type="hidden" name="document_id" value={uploaded.id} />
-                        <input type="hidden" name="application_id" value={application.id} />
-                        <button type="submit" className="text-xs font-medium text-accent">
-                          Mark verified
-                        </button>
-                      </form>
-                    )}
-                  </div>
-                );
-              })}
+            <div className="mt-4">
+              <DocumentReviewList
+                requiredDocuments={requiredDocs}
+                documents={documents}
+                applicationId={application.id}
+                verifyAction={verifyDocument}
+                rejectAction={rejectDocument}
+              />
             </div>
           </Card>
 

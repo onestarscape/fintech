@@ -4,6 +4,7 @@
 
 export type UserRole = "customer" | "employee" | "admin" | "agent" | "builder";
 export type AgentStatus = "pending" | "approved" | "suspended";
+export type DocumentStatus = "pending" | "verified" | "rejected";
 export type BuilderStatus = "pending" | "approved" | "suspended";
 export type CommissionStatus = "pending" | "approved" | "paid";
 export type PartnerType = "bank" | "nbfc" | "insurer" | "other";
@@ -142,7 +143,8 @@ export interface Database {
           doc_key: string;
           label: string;
           storage_path: string;
-          verified: boolean;
+          status: DocumentStatus;
+          rejection_reason: string | null;
           verified_by: string | null;
           uploaded_at: string;
         };
@@ -300,6 +302,7 @@ export interface Database {
       agent_status: AgentStatus;
       builder_status: BuilderStatus;
       commission_status: CommissionStatus;
+      document_status: DocumentStatus;
     };
     CompositeTypes: Record<string, never>;
   };

@@ -1,9 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Upload, CheckCircle2, ShieldCheck } from "lucide-react";
+import { Upload, CheckCircle2, ShieldCheck, AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import type { RequiredDocumentDef } from "@/types/database";
+import type { RequiredDocumentDef, DocumentStatus } from "@/types/database";
 
 /** "Paul Baker", "PAN Card" -> "Paul-Baker-PAN-Card" — safe for a storage path segment. */
 function slugifyForFilename(text: string) {
@@ -13,19 +13,25 @@ function slugifyForFilename(text: string) {
     .replace(/\s+/g, "-");
 }
 
+export interface UploadedDocState {
+  doc_key: string;
+  status: DocumentStatus;
+  rejection_reason: string | null;
+}
+
 export function DocumentUploader({
   applicationId,
   customerName,
   requiredDocuments,
-  uploadedKeys,
+  uploadedDocs,
 }: {
   applicationId: string;
   customerName: string;
   requiredDocuments: RequiredDocumentDef[];
-  uploadedKeys: string[];
+  uploadedDocs: UploadedDocState[];
 }) {
   const [busyKey, setBusyKey] = useState<string | null>(null);
-  const [done, setDone] = useState<string[]>(uploadedKeys);
+  const [docs, setDocs] = useState<UploadedDocState[]>(uploadedDocs);
   const [error, setError] = useState<string | null>(null);
 
   const sections = useMemo(() => {
@@ -43,10 +49,6 @@ export function DocumentUploader({
     setError(null);
     const supabase = createClient();
 
-    // File name always defaults to "<Customer Name> <Document Name>", e.g.
-    // "Paul Baker PAN Card.pdf" — regardless of what the original file was
-    // called on the customer's device — so staff reviewing the documents
-    // bucket instantly know whose document and which one they're looking at.
     const extMatch = file.name.match(/\.[^.]+$/);
     const ext = extMatch ? extMatch[0] : "";
     const niceName = `${slugifyForFilename(customerName) || "Customer"}-${slugifyForFilename(doc.label)}${ext}`;
@@ -62,19 +64,32 @@ export function DocumentUploader({
       return;
     }
 
-    const { error: insertError } = await supabase.from("documents").insert({
-      application_id: applicationId,
-      doc_key: doc.key,
-      label: `${customerName} ${doc.label}`,
-      storage_path: path,
-    });
+    // Replaces the existing row for this document (if any) rather than
+    // creating a duplicate — and resets it back to "pending" review, since
+    // a re-upload (e.g. after a rejection) needs to be checked again.
+    const { error: upsertError } = await supabase
+      .from("documents")
+      .upsert(
+        {
+          application_id: applicationId,
+          doc_key: doc.key,
+          label: `${customerName} ${doc.label}`,
+          storage_path: path,
+          status: "pending",
+          rejection_reason: null,
+        },
+        { onConflict: "application_id,doc_key" }
+      );
 
     setBusyKey(null);
-    if (insertError) {
-      setError(insertError.message);
+    if (upsertError) {
+      setError(upsertError.message);
       return;
     }
-    setDone((prev) => [...prev, doc.key]);
+    setDocs((prev) => [
+      ...prev.filter((d) => d.doc_key !== doc.key),
+      { doc_key: doc.key, status: "pending", rejection_reason: null },
+    ]);
   }
 
   return (
@@ -88,42 +103,63 @@ export function DocumentUploader({
         </p>
       </div>
 
-      {sections.map(([section, docs]) => (
+      {sections.map(([section, sectionDocs]) => (
         <div key={section}>
           <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted">
             {section}
           </p>
           <div className="space-y-2">
-            {docs.map((doc) => {
-              const isDone = done.includes(doc.key);
+            {sectionDocs.map((doc) => {
+              const state = docs.find((d) => d.doc_key === doc.key);
               const isBusy = busyKey === doc.key;
+              const isRejected = state?.status === "rejected";
+              const isVerified = state?.status === "verified";
+              const isPending = state?.status === "pending";
+
               return (
-                <label
-                  key={doc.key}
-                  className="flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] border border-line px-4 py-3 text-sm hover:bg-black/[0.02]"
-                >
-                  <span className="flex items-center gap-2">
-                    {isDone ? (
-                      <CheckCircle2 className="h-4 w-4 text-success" />
-                    ) : (
-                      <Upload className="h-4 w-4 text-muted" />
-                    )}
-                    {doc.label}
-                    {!doc.required && <span className="text-xs text-muted">(optional)</span>}
-                  </span>
-                  <span className="text-xs font-medium text-accent">
-                    {isBusy ? "Uploading…" : isDone ? "Uploaded — click to replace" : "Upload"}
-                  </span>
-                  <input
-                    type="file"
-                    className="hidden"
-                    disabled={isBusy}
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleUpload(doc, file);
-                    }}
-                  />
-                </label>
+                <div key={doc.key}>
+                  <label
+                    className={`flex cursor-pointer items-center justify-between rounded-[var(--radius-sm)] border px-4 py-3 text-sm hover:bg-black/[0.02] ${
+                      isRejected ? "border-danger/40 bg-danger-soft/40" : "border-line"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      {isVerified && <CheckCircle2 className="h-4 w-4 text-success" />}
+                      {isRejected && <AlertCircle className="h-4 w-4 text-danger" />}
+                      {isPending && <CheckCircle2 className="h-4 w-4 text-muted" />}
+                      {!state && <Upload className="h-4 w-4 text-muted" />}
+                      {doc.label}
+                      {!doc.required && <span className="text-xs text-muted">(optional)</span>}
+                    </span>
+                    <span
+                      className={`text-xs font-medium ${isRejected ? "text-danger" : "text-accent"}`}
+                    >
+                      {isBusy
+                        ? "Uploading…"
+                        : isVerified
+                        ? "Verified"
+                        : isRejected
+                        ? "Rejected — re-upload"
+                        : isPending
+                        ? "Uploaded — under review"
+                        : "Upload"}
+                    </span>
+                    <input
+                      type="file"
+                      className="hidden"
+                      disabled={isBusy}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUpload(doc, file);
+                      }}
+                    />
+                  </label>
+                  {isRejected && state?.rejection_reason && (
+                    <p className="mt-1.5 px-1 text-xs text-danger">
+                      Reason: {state.rejection_reason}
+                    </p>
+                  )}
+                </div>
               );
             })}
           </div>
