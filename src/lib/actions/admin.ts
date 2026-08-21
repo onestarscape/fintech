@@ -254,3 +254,29 @@ export async function suspendBuilder(formData: FormData) {
   await supabase.from("builders").update({ status: "suspended" }).eq("id", builderId);
   revalidatePath("/admin/builders");
 }
+
+export async function assignLeadToEmployee(formData: FormData) {
+  const leadId = String(formData.get("lead_id"));
+  const employeeId = String(formData.get("employee_id"));
+
+  const supabase = await createClient();
+
+  const { data: lead } = await supabase
+    .from("leads")
+    .update({ assigned_to: employeeId || null, status: employeeId ? "contacted" : "new" })
+    .eq("id", leadId)
+    .select("full_name, products(name)")
+    .single<any>();
+
+  if (employeeId) {
+    await notifyUser(
+      supabase,
+      employeeId,
+      "New lead assigned to you",
+      `${lead?.full_name ?? "A lead"} — ${lead?.products?.name ?? ""}`,
+      "/employee/leads"
+    );
+  }
+
+  revalidatePath("/admin/leads");
+}

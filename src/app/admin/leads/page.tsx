@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Badge } from "@/components/ui/badge";
 import { Input, Select } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { assignLeadToEmployee } from "@/lib/actions/admin";
 
 const LEAD_STATUSES = ["new", "contacted", "converted", "dropped"];
 
@@ -14,10 +15,10 @@ export default async function AdminLeadsPage({
   const { q, status, product_id } = await searchParams;
   const supabase = await createClient();
 
-  const { data: products } = await supabase
-    .from("products")
-    .select("id, name")
-    .order("display_order");
+  const [{ data: products }, { data: employees }] = await Promise.all([
+    supabase.from("products").select("id, name").order("display_order"),
+    supabase.from("profiles").select("id, full_name").in("role", ["employee", "admin"]),
+  ]);
 
   let query: any = supabase
     .from("leads")
@@ -71,7 +72,7 @@ export default async function AdminLeadsPage({
 
       <div className="mt-6 overflow-hidden rounded-[var(--radius-lg)] border border-line">
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full min-w-[760px] text-sm">
           <thead className="border-b border-line bg-black/[0.02] text-left text-xs font-medium text-muted">
             <tr>
               <th className="px-4 py-3">Name</th>
@@ -79,6 +80,7 @@ export default async function AdminLeadsPage({
               <th className="px-4 py-3">Product</th>
               <th className="px-4 py-3">City</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Assigned to</th>
               <th className="px-4 py-3">Received</th>
             </tr>
           </thead>
@@ -91,6 +93,22 @@ export default async function AdminLeadsPage({
                 <td className="px-4 py-3">{lead.city}</td>
                 <td className="px-4 py-3">
                   <Badge tone={lead.status === "new" ? "accent" : "neutral"}>{lead.status}</Badge>
+                </td>
+                <td className="px-4 py-3">
+                  <form action={assignLeadToEmployee} className="flex items-center gap-1.5">
+                    <input type="hidden" name="lead_id" value={lead.id} />
+                    <Select
+                      name="employee_id"
+                      defaultValue={lead.assigned_to ?? ""}
+                      className="h-8 w-36 text-xs"
+                    >
+                      <option value="">Unassigned</option>
+                      {employees?.map((e) => (
+                        <option key={e.id} value={e.id}>{e.full_name ?? e.id.slice(0, 8)}</option>
+                      ))}
+                    </Select>
+                    <button type="submit" className="text-xs font-medium text-accent">Set</button>
+                  </form>
                 </td>
                 <td className="px-4 py-3 text-muted">
                   {new Date(lead.created_at).toLocaleDateString("en-IN")}
