@@ -1,26 +1,94 @@
+import Link from "next/link";
+import { AlertTriangle, Users, Handshake, Building2, FileText, Clock } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { refreshProductCache } from "@/lib/actions/cache";
 
+function getFiveDaysAgoISOString() {
+  return new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString();
+}
+
 export default async function AdminOverviewPage() {
   const supabase = await createClient();
+  const fiveDaysAgo = getFiveDaysAgoISOString();
 
-  const [{ count: leadCount }, { count: appCount }, { count: pendingCount }, { count: productCount }, { count: partnerCount }] =
-    await Promise.all([
-      supabase.from("leads").select("*", { count: "exact", head: true }),
-      supabase.from("applications").select("*", { count: "exact", head: true }),
-      supabase
-        .from("applications")
-        .select("*", { count: "exact", head: true })
-        .in("status", ["submitted", "under_review", "action_required"]),
-      // Fetched directly, uncached — always reflects the real database
-      // right now, so you can compare it against what the (cached)
-      // public site is showing if something looks off after a migration.
-      supabase.from("products").select("*", { count: "exact", head: true }).eq("is_active", true),
-      supabase.from("partners").select("*", { count: "exact", head: true }).eq("is_active", true),
-    ]);
+  const [
+    { count: leadCount },
+    { count: appCount },
+    { count: pendingCount },
+    { count: productCount },
+    { count: partnerCount },
+    { count: unassignedLeads },
+    { count: pendingAgents },
+    { count: pendingBuilders },
+    { count: pendingDocs },
+    { count: staleApps },
+    { count: outstandingCommissions },
+  ] = await Promise.all([
+    supabase.from("leads").select("*", { count: "exact", head: true }),
+    supabase.from("applications").select("*", { count: "exact", head: true }),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .in("status", ["submitted", "under_review", "action_required"]),
+    supabase.from("products").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("partners").select("*", { count: "exact", head: true }).eq("is_active", true),
+    // Action items — everything below is something a real person is
+    // waiting on staff for. This is the actual point of an admin
+    // homepage: not just numbers, but "here's what needs you today."
+    supabase.from("leads").select("*", { count: "exact", head: true }).is("assigned_to", null),
+    supabase.from("agents").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("builders").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    supabase.from("documents").select("*", { count: "exact", head: true }).eq("status", "pending"),
+    supabase
+      .from("applications")
+      .select("*", { count: "exact", head: true })
+      .in("status", ["submitted", "under_review", "action_required", "approved"])
+      .lt("updated_at", fiveDaysAgo),
+    supabase.from("commissions").select("*", { count: "exact", head: true }).neq("status", "paid"),
+  ]);
 
+  const actionItems = [
+    {
+      label: "Unassigned leads",
+      count: unassignedLeads ?? 0,
+      href: "/admin/leads",
+      icon: <Users className="h-4 w-4" strokeWidth={1.75} />,
+    },
+    {
+      label: "Documents pending review",
+      count: pendingDocs ?? 0,
+      href: "/admin/documents",
+      icon: <FileText className="h-4 w-4" strokeWidth={1.75} />,
+    },
+    {
+      label: "Applications stuck 5+ days",
+      count: staleApps ?? 0,
+      href: "/admin/pipeline",
+      icon: <Clock className="h-4 w-4" strokeWidth={1.75} />,
+    },
+    {
+      label: "Agent applications to approve",
+      count: pendingAgents ?? 0,
+      href: "/admin/agents",
+      icon: <Handshake className="h-4 w-4" strokeWidth={1.75} />,
+    },
+    {
+      label: "Builder applications to approve",
+      count: pendingBuilders ?? 0,
+      href: "/admin/builders",
+      icon: <Building2 className="h-4 w-4" strokeWidth={1.75} />,
+    },
+    {
+      label: "Outstanding commissions",
+      count: outstandingCommissions ?? 0,
+      href: "/admin/agents",
+      icon: <AlertTriangle className="h-4 w-4" strokeWidth={1.75} />,
+    },
+  ];
+
+  const totalActionItems = actionItems.reduce((sum, i) => sum + i.count, 0);
   const stats = [
     { label: "Total leads", value: leadCount ?? 0 },
     { label: "Total applications", value: appCount ?? 0 },
@@ -30,7 +98,37 @@ export default async function AdminOverviewPage() {
   return (
     <div>
       <h1 className="font-display text-2xl font-semibold tracking-tight">Overview</h1>
-      <div className="mt-6 grid gap-4 sm:grid-cols-3">
+
+      {/* ACTION CENTER — the actual point of this page: what needs a
+          human right now, not just numbers. */}
+      <div className="mt-6">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold">
+            {totalActionItems > 0 ? `${totalActionItems} things need your attention` : "Nothing needs attention"}
+          </h2>
+        </div>
+        <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {actionItems.map((item) => (
+            <Link key={item.label} href={item.href}>
+              <Card
+                className={`flex items-center justify-between p-4 hover:shadow-[0_4px_16px_rgba(18,19,26,0.06)] ${
+                  item.count > 0 ? "border-accent/30 bg-accent-soft/40" : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <span className={item.count > 0 ? "text-accent" : "text-muted"}>{item.icon}</span>
+                  <span className="text-sm font-medium">{item.label}</span>
+                </div>
+                <span className={`font-display text-lg font-semibold ${item.count > 0 ? "text-accent" : "text-muted"}`}>
+                  {item.count}
+                </span>
+              </Card>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-8 grid gap-4 sm:grid-cols-3">
         {stats.map((s) => (
           <Card key={s.label} className="p-6">
             <p className="text-sm text-muted">{s.label}</p>
