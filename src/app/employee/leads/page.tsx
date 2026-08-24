@@ -1,3 +1,4 @@
+import { AlertCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -6,6 +7,11 @@ import { Button } from "@/components/ui/button";
 import { claimLead, updateLeadStatus, addFollowUp } from "@/lib/actions/employee";
 
 const LEAD_STATUSES = ["new", "contacted", "converted", "dropped"];
+const ACTIVE_STATUSES = ["new", "contacted"];
+
+function daysSince(dateStr: string) {
+  return Math.floor((Date.now() - new Date(dateStr).getTime()) / (1000 * 60 * 60 * 24));
+}
 
 export default async function EmployeeLeadsPage() {
   const supabase = await createClient();
@@ -18,7 +24,7 @@ export default async function EmployeeLeadsPage() {
       .from("leads")
       .select("*, products(name), follow_ups(*)")
       .eq("assigned_to", user!.id)
-      .order("created_at", { ascending: false })
+      .order("updated_at", { ascending: true })
     .limit(100)
       .returns<any[]>(),
     supabase
@@ -34,11 +40,17 @@ export default async function EmployeeLeadsPage() {
       <div>
         <h1 className="font-display text-2xl font-semibold tracking-tight">My leads</h1>
         <div className="mt-4 space-y-3">
-          {myLeads?.map((lead) => (
-            <Card key={lead.id} className="p-5">
+          {myLeads?.map((lead) => {
+            const stale = ACTIVE_STATUSES.includes(lead.status) && daysSince(lead.updated_at) >= 5;
+            return (
+            <Card key={lead.id} className={`p-5 ${stale ? "border-warning/40 bg-warning-soft/30" : ""}`}>
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="font-medium">{lead.full_name}</p>
+                  <div className="flex items-center gap-2">
+                    {stale && <AlertCircle className="h-3.5 w-3.5 text-warning" />}
+                    <p className="font-medium">{lead.full_name}</p>
+                    {stale && <Badge tone="warning">{daysSince(lead.updated_at)}d untouched</Badge>}
+                  </div>
                   <p className="text-sm text-muted">
                     {lead.products?.name} · {lead.phone} · {lead.city}
                   </p>
@@ -82,7 +94,8 @@ export default async function EmployeeLeadsPage() {
                 </form>
               </div>
             </Card>
-          ))}
+            );
+          })}
           {!myLeads?.length && (
             <Card className="p-8 text-center">
               <p className="text-sm text-muted">No leads assigned to you yet — claim one below.</p>
