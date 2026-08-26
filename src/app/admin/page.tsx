@@ -25,6 +25,7 @@ export default async function AdminOverviewPage() {
     { count: pendingDocs },
     { count: staleApps },
     { count: outstandingCommissions },
+    { data: recentActivity },
   ] = await Promise.all([
     supabase.from("leads").select("*", { count: "exact", head: true }),
     supabase.from("applications").select("*", { count: "exact", head: true }),
@@ -47,6 +48,12 @@ export default async function AdminOverviewPage() {
       .in("status", ["submitted", "under_review", "action_required", "approved"])
       .lt("updated_at", fiveDaysAgo),
     supabase.from("commissions").select("*", { count: "exact", head: true }).neq("status", "paid"),
+    supabase
+      .from("status_history")
+      .select("id, status, stage, created_at, applications(products(name), leads(full_name))")
+      .order("created_at", { ascending: false })
+      .limit(15)
+      .returns<any[]>(),
   ]);
 
   const actionItems = [
@@ -159,6 +166,36 @@ export default async function AdminOverviewPage() {
           </form>
         </div>
       </Card>
+
+      <div className="mt-6">
+        <h2 className="text-sm font-semibold">Recent activity</h2>
+        <Card className="mt-3 divide-y divide-line p-0">
+          {(recentActivity ?? []).map((entry) => (
+            <div key={entry.id} className="flex items-center justify-between px-5 py-3 text-sm">
+              <div>
+                <span className="font-medium">{entry.applications?.leads?.full_name ?? "Someone"}</span>
+                <span className="text-muted">
+                  {" "}
+                  · {entry.applications?.products?.name} moved to{" "}
+                  <span className="text-ink">{entry.status.replace(/_/g, " ")}</span>
+                  {entry.stage ? ` (${entry.stage})` : ""}
+                </span>
+              </div>
+              <span className="shrink-0 font-mono-data text-xs text-muted">
+                {new Date(entry.created_at).toLocaleString("en-IN", {
+                  day: "numeric",
+                  month: "short",
+                  hour: "numeric",
+                  minute: "2-digit",
+                })}
+              </span>
+            </div>
+          ))}
+          {!recentActivity?.length && (
+            <p className="p-6 text-center text-sm text-muted">No activity yet.</p>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
