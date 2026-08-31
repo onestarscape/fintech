@@ -42,7 +42,7 @@ export default async function DashboardPage() {
             Track every application in one place.
           </p>
         </div>
-        <Link href="/#products" className={cn(buttonVariants({ variant: "accent", size: "sm" }))}>
+        <Link href="/dashboard/apply" className={cn(buttonVariants({ variant: "accent", size: "sm" }))}>
           New application
         </Link>
       </div>
@@ -95,7 +95,7 @@ export default async function DashboardPage() {
               No applications yet. Starting one takes about two minutes.
             </p>
             <Link
-              href="/#products"
+              href="/dashboard/apply"
               className={cn(buttonVariants({ variant: "accent", size: "md" }), "mt-4")}
             >
               Explore products

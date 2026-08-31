@@ -9,7 +9,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 const LINKS = [
-  { href: "/#products", label: "Products" },
+  { href: "https://www.fastuploans.com/services", label: "Products" },
   { href: "/emi-calculator", label: "EMI Calculator" },
   { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
