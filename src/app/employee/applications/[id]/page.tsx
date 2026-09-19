@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { StatusBadge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
@@ -54,7 +56,10 @@ export default async function EmployeeApplicationDetailPage({
 
   return (
     <div className="max-w-4xl">
-      <div className="flex items-start justify-between">
+      <Link href="/employee/applications" className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink">
+        <ArrowLeft className="h-3.5 w-3.5" /> All applications
+      </Link>
+      <div className="mt-3 flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-accent">{product?.name}</p>
           <h1 className="font-display mt-1 text-2xl font-semibold tracking-tight">{lead?.full_name}</h1>

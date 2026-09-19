@@ -1,4 +1,6 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -35,7 +37,10 @@ export default async function ProjectDetailPage({
   return (
     <div className="max-w-2xl space-y-8">
       <div>
-        <p className="text-sm font-medium text-accent">Project</p>
+        <Link href="/builder/projects" className="flex items-center gap-1.5 text-xs font-medium text-muted hover:text-ink">
+          <ArrowLeft className="h-3.5 w-3.5" /> All projects
+        </Link>
+        <p className="mt-3 text-sm font-medium text-accent">Project</p>
         <h1 className="font-display mt-1 text-2xl font-semibold tracking-tight">{project.name}</h1>
         <p className="mt-1 text-sm text-muted">
           {project.location} {project.total_units ? `· ${project.total_units} units` : ""}
